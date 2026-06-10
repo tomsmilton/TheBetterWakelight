@@ -22,6 +22,10 @@ screen when uploading; JLC reshuffles Basic/Extended periodically.
 - Both U1 (module) and J2 (THT terminal) are supported on **Economic** assembly;
   JLC auto-adds a small assembly-fixture fee for the module.
 - 6 extended parts → ~$18 in feeder fees; per-board parts ≈ $6.6.
-- Rotation gotchas at the JLC placement preview: U1 (antenna must hang off the
-  board's left edge) and J1 (tongue off the bottom edge). Fix with the rotate
-  button in the preview if needed — do not skip this check.
+- Rotation: U1's KiCad↔JLC library mismatch is **already corrected in the CPL**
+  (verified against the placement preview 2026-06-10 — JLC value 0° puts the
+  antenna off the left edge). Still re-check the preview after re-upload:
+  U1 antenna overhanging LEFT, J1 tongue off the BOTTOM edge, U3 tab toward
+  the top edge, D1/D2 pin-1 (cathode) markers on the lower pad of each.
+- U2: JLC may substitute their in-stock CH340C listing (e.g. C7464026) for the
+  EOL-flagged C84681 — fine, as long as the matched part is CH340**C**, SOP-16.

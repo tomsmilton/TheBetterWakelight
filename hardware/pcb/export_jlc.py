@@ -45,6 +45,15 @@ LCSC = {
     "SW2": ("Tact switch TS-1187A", "C318884"),
 }
 
+# Per-part rotation corrections: JLC's library zero-orientation differs from
+# KiCad's for some parts. Offsets are added to the KiCad rotation.
+# U1: verified against the JLC placement preview 2026-06-10 — KiCad 90 deg
+# rendered the antenna pointing down; JLC's zero has the antenna pointing
+# left, so the correct JLC rotation is 0.
+JLC_ROT_OFFSET = {
+    "U1": -90,
+}
+
 bom_rows = {}
 cpl_rows = []
 for fp in board.GetFootprints():
@@ -58,12 +67,13 @@ for fp in board.GetFootprints():
                               "LCSC": part})
     bom_rows[key]["Designator"].append(ref)
     pos = fp.GetPosition()
+    rot = (fp.GetOrientation().AsDegrees() + JLC_ROT_OFFSET.get(ref, 0)) % 360
     cpl_rows.append({
         "Designator": ref,
         "Mid X": f"{ToMM(pos.x):.3f}mm",
         "Mid Y": f"{-ToMM(pos.y):.3f}mm",   # JLC uses y-up
         "Layer": "Top",
-        "Rotation": f"{fp.GetOrientation().AsDegrees():.0f}",
+        "Rotation": f"{rot:.0f}",
     })
 
 with open(os.path.join(HERE, "jlcpcb_bom.csv"), "w", newline="") as f:
