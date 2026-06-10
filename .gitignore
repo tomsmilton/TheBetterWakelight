@@ -1,0 +1,11 @@
+# PlatformIO build output
+firmware/.pio/
+
+# KiCad backups / locks / caches
+*.kicad_pcb-bak
+*-backups/
+*.lck
+fp-info-cache
+
+# macOS
+.DS_Store
