@@ -9,3 +9,7 @@ fp-info-cache
 
 # macOS
 .DS_Store
+
+# generated meshes (regenerate: python3 hardware/pcb/export_stl.py)
+*.stl
+enclosure_stl.zip
