@@ -83,7 +83,8 @@ PARTS = {
         "5": "USB_DP", "6": "USB_DM",
         "13": "DTR", "14": "RTS", "15": "GND", "16": "+3V3",
     }),
-    "U3": ("Package_TO_SOT_SMD", "SOT-223-3_TabPin2", "AMS1117-3.3", 44.6, 30.5, 90, {
+    # tucked in the strip below the XLR, tab toward the connector
+    "U3": ("Package_TO_SOT_SMD", "SOT-223-3_TabPin2", "AMS1117-3.3", 50.5, 37.9, 0, {
         "1": "GND", "2": "+3V3", "3": "+5V",
     }),
     "U4": ("Package_SO", "SOIC-8_3.9x4.9mm_P1.27mm", "THVD1410DR", 39.5, 10.0, 0, {
@@ -105,7 +106,7 @@ PARTS = {
     "R3": ("Resistor_SMD", "R_0603_1608Metric", "10k", 19.0, 32.5, 90, {"1": "DTR", "2": "Q_EN_B"}),
     "R4": ("Resistor_SMD", "R_0603_1608Metric", "10k", 21.5, 32.5, 90, {"1": "RTS", "2": "Q_IO0_B"}),
     "R5": ("Resistor_SMD", "R_0603_1608Metric", "10k", 3.5, 29.0, 90, {"1": "+3V3", "2": "EN"}),
-    "R6": ("Resistor_SMD", "R_0603_1608Metric", "1k", 51.5, 28.0, 90, {"1": "+3V3", "2": "PWR_LED"}),
+    "R6": ("Resistor_SMD", "R_0603_1608Metric", "1k", 58.2, 36.5, 90, {"1": "+3V3", "2": "PWR_LED"}),
     "R7": ("Resistor_SMD", "R_0603_1608Metric", "1k", 21.5, 11.0, 90, {"1": "LED_ST", "2": "Q_LED_K"}),
     "R8": ("Resistor_SMD", "R_0603_1608Metric", "10k", 33.0, 10.0, 90, {"1": "+3V3", "2": "DMX_EN"}),
     "R9": ("Resistor_SMD", "R_0603_1608Metric", "680R", 44.5, 4.5, 90, {"1": "+3V3", "2": "DMX_A"}),
@@ -113,7 +114,7 @@ PARTS = {
     "R11": ("Resistor_SMD", "R_0603_1608Metric", "120R DNP", 42.0, 19.5, 90, {"1": "DMX_A", "2": "DMX_B"}),
     # caps
     "C1": ("Capacitor_SMD", "C_0805_2012Metric", "10uF", 40.5, 37.5, 0, {"1": "+5V", "2": "GND"}),
-    "C2": ("Capacitor_SMD", "C_0805_2012Metric", "22uF", 39.6, 32.5, 90, {"1": "+3V3", "2": "GND"}),
+    "C2": ("Capacitor_SMD", "C_0805_2012Metric", "22uF", 44.8, 37.9, 90, {"1": "+3V3", "2": "GND"}),
     "C3": ("Capacitor_SMD", "C_0603_1608Metric", "100nF", 39.5, 24.0, 90, {"1": "+3V3", "2": "GND"}),
     "C4": ("Capacitor_SMD", "C_0805_2012Metric", "22uF", 9.0, 28.6, 90, {"1": "+3V3", "2": "GND"}),
     "C5": ("Capacitor_SMD", "C_0603_1608Metric", "100nF", 11.5, 28.6, 90, {"1": "+3V3", "2": "GND"}),
@@ -121,20 +122,25 @@ PARTS = {
     "C7": ("Capacitor_SMD", "C_0603_1608Metric", "100nF", 39.0, 5.3, 90, {"1": "+3V3", "2": "GND"}),
     "C8": ("Capacitor_SMD", "C_0805_2012Metric", "4.7uF", 41.5, 5.3, 90, {"1": "+3V3", "2": "GND"}),
     # LEDs (0603: 1=K 2=A)
-    "D1": ("LED_SMD", "LED_0603_1608Metric", "PWR red", 51.5, 32.0, 90, {"1": "GND", "2": "PWR_LED"}),
+    "D1": ("LED_SMD", "LED_0603_1608Metric", "PWR red", 56.5, 36.5, 90, {"1": "GND", "2": "PWR_LED"}),
     "D2": ("LED_SMD", "LED_0603_1608Metric", "ST blue", 21.5, 15.0, 90, {"1": "GND", "2": "Q_LED_K"}),
     # buttons on the bottom edge for usability
     "SW1": ("Button_Switch_SMD", "SW_SPST_TL3342", "EN", 11.5, 38.0, 0, {"1": "EN", "2": "GND"}),
     "SW2": ("Button_Switch_SMD", "SW_SPST_TL3342", "BOOT", 20.5, 38.0, 0, {"1": "IO0", "2": "GND"}),
-    # DMX terminal: pin1=GND pin2=D- pin3=D+ (matches XLR pin numbers),
-    # wire entry facing off the right edge.
-    "J2": ("TerminalBlock_Phoenix", "TerminalBlock_Phoenix_MKDS-1,5-3-5.08_1x03_P5.08mm_Horizontal",
-           "DMX OUT", 49.2, 10.5, 270, {"1": "GND", "2": "DMX_B", "3": "DMX_A"}),
+    # DMX OUT: Neutrik NC5FAH PCB-mount female 5-pin XLR, horizontal entry.
+    # Footprint origin = pin 1; its Dwgs.User edge marker sits at +17.15 mm,
+    # so with the board 66 mm wide pin 1 goes at x = 66 - 17.15 = 48.85 and
+    # the latch nose overhangs the right edge by 2.7 mm as Neutrik intends.
+    # DMX pinout: 1 = common/GND, 2 = Data-, 3 = Data+, 4/5 unused,
+    # G = shell ground contact (tied to GND, non-isolated design).
+    "J2": ("Connector_Audio", "Jack_XLR_Neutrik_NC5FAH_Horizontal",
+           "NC5FAH DMX OUT", 48.85, 17.0, 0,
+           {"1": "GND", "2": "DMX_B", "3": "DMX_A", "G": "GND"}),
     # mounting holes
     "H1": ("MountingHole", "MountingHole_3.2mm_M3", "", 3.5, 3.5, 0, {}),
     "H2": ("MountingHole", "MountingHole_3.2mm_M3", "", 3.5, 38.5, 0, {}),
-    "H3": ("MountingHole", "MountingHole_3.2mm_M3", "", 51.5, 38.5, 0, {}),
-    "H4": ("MountingHole", "MountingHole_3.2mm_M3", "", 51.5, 3.5, 0, {}),
+    "H3": ("MountingHole", "MountingHole_3.2mm_M3", "", 62.5, 38.5, 0, {}),
+    "H4": ("MountingHole", "MountingHole_3.2mm_M3", "", 62.5, 3.5, 0, {}),
 }
 
 # net used twice with different names above (R7/D2 junction)
@@ -170,13 +176,13 @@ def silk_text(s, x, y, size=1.0, layer=pcbnew.F_SilkS, angle=0):
     t.SetTextAngle(pcbnew.EDA_ANGLE(angle, pcbnew.DEGREES_T))
     board.Add(t)
 
-silk_text("DMX 1:GND 2:D- 3:D+", 47.6, 24.7, 0.7)
-silk_text("WakeLight v1.0", 27.5, 1.8, 1.4)
+silk_text("DMX OUT", 51.5, 6.2, 1.0)
+silk_text("WakeLight v1.1", 30.0, 1.8, 1.4)
 silk_text("EN", 11.5, 33.6, 0.8)
 silk_text("BOOT", 20.5, 33.6, 0.8)
 
 # -------------------------------------------------------------- board outline
-W, H = 55.0, 42.0
+W, H = 66.0, 42.0
 corners = [(0, 0), (W, 0), (W, H), (0, H)]
 for i in range(4):
     seg = pcbnew.PCB_SHAPE(board)

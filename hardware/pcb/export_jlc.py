@@ -17,7 +17,8 @@ LCSC = {
     "U3": ("AMS1117-3.3", "C6186"),
     "U4": ("THVD1410DR", "C2671345"),
     "J1": ("USB-C 16P TYPE-C-31-M-12", "C165948"),
-    "J2": ("Screw terminal 3P 5.0mm KF301", "C474882"),
+    # J2 (Neutrik NC5FAH XLR) is hand-soldered — deliberately not in the
+    # JLC BOM/CPL. Order it from CPC/Mouser, 5 THT joints + shell pin.
     "Q1": ("SS8050", "C2150"),
     "Q2": ("SS8050", "C2150"),
     "R1": ("5.1k 0603", "C23186"),
@@ -60,10 +61,8 @@ JLC_ROT_OFFSET = {
 }
 
 # Position overrides: JLC wants the component CENTRE; some KiCad footprints
-# anchor at pin 1 instead. J2 (1x3 terminal): centre = the middle pin.
-JLC_POS_OVERRIDE = {
-    "J2": (49.2, 15.58),
-}
+# anchor at pin 1 instead. (None needed for the current BOM.)
+JLC_POS_OVERRIDE = {}
 
 bom_rows = {}
 cpl_rows = []

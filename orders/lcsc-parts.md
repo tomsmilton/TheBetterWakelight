@@ -10,7 +10,7 @@ screen when uploading; JLC reshuffles Basic/Extended periodically.
 | U3 | AMS1117-3.3 | C6186 | Basic | |
 | U4 | THVD1410DR | C2671345 | Extended | RS-485 driver, ±18 kV ESD |
 | J1 | USB-C TYPE-C-31-M-12 | C165948 | Extended | |
-| J2 | KF301-5.0-3P screw terminal | **C474882** | Extended | (C474881 is the 2-pin — wrong). 5.0 mm pitch in a 5.08 footprint: 0.08 mm/pin offset, fits fine in the 1.3 mm holes |
+| J2 | Neutrik NC5FAH 5-pin female XLR (v1.1) | not in BOM | — | **Hand-soldered** (8 THT holes, 6 electrical). Buy: Rapid 20-1840 £3.11 ([rapidonline.com](https://www.rapidonline.com/neutrik-nc5fah-d-5-pin-xlr-female-socket-dmx-20-1840), 400+ stock, free UK ship) or CPC AV11169. Successor **NC5FAH1** has an identical footprint — either fits. LCSC stocks it too (**C368501**, ~$5) if you'd rather have JLC fit it — add it to the BOM/CPL manually and expect a THT-assembly fee. Footprint verified hole-by-hole against Neutrik drawing ST-NC5FAH + DXF. |
 | Q1,Q2 | SS8050 | C2150 | Basic | |
 | R 0603 | 5.1k C23186 · 10k C25804 · 1k C21190 · 680R C23228 | | Basic | |
 | C | 100n C14663 · 1u C15849 · 10u C15850 · 22u C45783 · 4.7u C1779 | | Basic | |

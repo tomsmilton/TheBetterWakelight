@@ -9,6 +9,11 @@ on your home Wi-Fi.
               ↑ Wi-Fi: http://wakelight.local
 ```
 
+The custom PCB (v1.1, 66 × 42 mm) carries a PCB-mount Neutrik NC5FAH female
+XLR on its edge, so any standard male→female 5-pin DMX lead connects the box
+to the lamp directly. The earlier screw-terminal variant is archived in
+`hardware/pcb/v1.0-terminal/`.
+
 ## What's here
 
 | Path | What |

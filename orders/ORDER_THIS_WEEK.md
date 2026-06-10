@@ -38,10 +38,22 @@ flash `firmware/` with `pio run -t upload`.
 
 # Order list B — custom PCB (the finished product, ~1 week with express)
 
+The current board is **v1.1**: 66 × 42 mm with a PCB-mount Neutrik NC5FAH
+female 5-pin XLR — a standard male-to-female DMX lead plugs straight in, no
+screw terminal or pigtail. (The earlier 55 mm screw-terminal variant is
+archived in `hardware/pcb/v1.0-terminal/`.)
+
+**Also order the connector itself** (hand-soldered, 6 joints): Neutrik
+**NC5FAH** — cheapest verified UK source is Rapid Electronics 20-1840 at
+**£3.11** with free shipping: 
+https://www.rapidonline.com/neutrik-nc5fah-d-5-pin-xlr-female-socket-dmx-20-1840
+(NC5FAH1 is the successor with an identical footprint — either works.)
+Plus one standard 5-pin DMX lead (male→female) to reach the lamp.
+
 At https://cart.jlcpcb.com/quote :
 
 1. Upload `hardware/pcb/wakelight_gerbers.zip`
-   - 2 layers, 55 × 42 mm (auto-detected), Qty 5, any colour (green is cheapest/fastest)
+   - 2 layers, 66 × 42 mm (auto-detected), Qty 5, any colour (green is cheapest/fastest)
    - Leave everything else default
 2. Tick **PCB Assembly** → Economic, Top side, Qty 2 (or 5)
    - Upload BOM: `hardware/pcb/jlcpcb_bom.csv`
@@ -49,6 +61,7 @@ At https://cart.jlcpcb.com/quote :
    - In the part-confirmation screen, check each line matched (see
      `orders/lcsc-parts.md` for verified part numbers and substitutions)
    - R11 (120 Ω termination) is intentionally absent — DNP
+   - J2 (the XLR) is intentionally absent from BOM/CPL — you solder it
    - In the placement-preview screen, rotate any part JLC shows misoriented
      (USB-C and the ESP32 module are the ones to eyeball: tongue off-board,
      antenna off-board)
@@ -57,5 +70,7 @@ At https://cart.jlcpcb.com/quote :
 
 Expected all-in for 5 boards / 2 assembled: **£35–55 + shipping**.
 
-The PCB takes the same firmware, same XLR wiring (screw terminal:
-1 = XLR 1 GND, 2 = XLR 2 D−, 3 = XLR 3 D+), and the same web portal.
+The PCB takes the same firmware and web portal as the module build. Once the
+assembled boards arrive, solder the NC5FAH into J2 (it only fits one way —
+two locating bosses), flash over USB-C, and plug a DMX lead from the board
+straight into the lamp's DMX-IN.

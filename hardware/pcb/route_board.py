@@ -17,7 +17,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PCB = os.path.join(HERE, "wakelight.kicad_pcb")
 
 GRID = 0.127                # mm per cell
-W_MM, H_MM = 55.0, 42.0
+W_MM, H_MM = 66.0, 42.0
 NX, NY = int(W_MM / GRID) + 1, int(H_MM / GRID) + 1
 EDGE_KEEP = 0.4             # stay this far from the board edge
 CLEAR = 0.2                 # copper clearance
@@ -589,8 +589,9 @@ for pad in stitch_failed:
     print(f"GND leg routed: {ref}.{pad.GetNumber()}")
 
 # IC GND pads hemmed in by routing starve their thermal spokes; bond solid.
+# J2: the XLR's PTH ground pins likewise (hand-soldered, solid is fine).
 for fp in board.GetFootprints():
-    if fp.GetReference() in ("U1", "U2", "U4"):
+    if fp.GetReference() in ("U1", "U2", "U4", "J2"):
         for pad in fp.Pads():
             if pad.GetNetCode() == gnd:
                 pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
