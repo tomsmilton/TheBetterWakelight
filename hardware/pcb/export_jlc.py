@@ -52,6 +52,17 @@ LCSC = {
 # left, so the correct JLC rotation is 0.
 JLC_ROT_OFFSET = {
     "U1": -90,
+    # SOIC parts: JLC library zero is 90 deg off KiCad's (verified in the
+    # placement preview 2026-06-10: U2 rendered vertical on a horizontal
+    # courtyard, U4 with leads top/bottom instead of left/right)
+    "U2": -90,
+    "U4": -90,
+}
+
+# Position overrides: JLC wants the component CENTRE; some KiCad footprints
+# anchor at pin 1 instead. J2 (1x3 terminal): centre = the middle pin.
+JLC_POS_OVERRIDE = {
+    "J2": (49.2, 15.58),
 }
 
 bom_rows = {}
@@ -67,11 +78,13 @@ for fp in board.GetFootprints():
                               "LCSC": part})
     bom_rows[key]["Designator"].append(ref)
     pos = fp.GetPosition()
+    px, py = ToMM(pos.x), ToMM(pos.y)
+    px, py = JLC_POS_OVERRIDE.get(ref, (px, py))
     rot = (fp.GetOrientation().AsDegrees() + JLC_ROT_OFFSET.get(ref, 0)) % 360
     cpl_rows.append({
         "Designator": ref,
-        "Mid X": f"{ToMM(pos.x):.3f}mm",
-        "Mid Y": f"{-ToMM(pos.y):.3f}mm",   # JLC uses y-up
+        "Mid X": f"{px:.3f}mm",
+        "Mid Y": f"{-py:.3f}mm",            # JLC uses y-up
         "Layer": "Top",
         "Rotation": f"{rot:.0f}",
     })
