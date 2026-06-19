@@ -14,7 +14,17 @@ XLR on its edge, so any standard male→female 5-pin DMX lead connects the box
 to the lamp directly. The earlier screw-terminal variant is archived in
 `hardware/pcb/v1.0-terminal/`.
 
-## Wiring
+## Schematic
+
+![WakeLight full schematic — USB-C power, AMS1117 LDO, CH340C auto-program, ESP32, THVD1410 DMX out](docs/schematic-diagram.svg)
+
+The whole board: USB-C 5 V → AMS1117 3.3 V LDO, a CH340C USB-UART with the
+classic SS8050 DTR/RTS auto-program circuit (one-click flashing — no buttons),
+the ESP32-WROOM-32E, and the THVD1410 RS-485 output stage. EN/boot have the
+usual pull-up, cap and tact switches; every supply pin is locally decoupled.
+Matching net-name tags denote the same electrical net.
+
+### DMX output stage (detail)
 
 ![WakeLight DMX output stage — ESP32 → THVD1410 RS-485 driver → female 5-pin XLR](docs/wiring-diagram.svg)
 
