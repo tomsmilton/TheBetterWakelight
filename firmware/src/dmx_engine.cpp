@@ -77,7 +77,17 @@ static void dmxTask(void*) {
 void DmxEngine::begin() {
   dmx_config_t config = DMX_CONFIG_DEFAULT;
   dmx_driver_install(DMX_PORT, &config, nullptr, 0);
-  dmx_set_pin(DMX_PORT, DMX_TX_PIN, DMX_RX_PIN, DMX_EN_PIN);
+
+  // This board is transmit-only (RO unconnected), so the transceiver must
+  // always be in drive mode. Do NOT give esp_dmx the enable pin: it manages
+  // it as a UART-RTS line that flips per send/receive, and on this wiring that
+  // left DE//RE un-asserted during TX — the lamp saw the stream briefly at boot
+  // then lost it (GPIO21 measured HIGH on 0/54638 samples). Instead we own
+  // GPIO21 directly and hold it HIGH permanently (high = drive bus).
+  dmx_set_pin(DMX_PORT, DMX_TX_PIN, DMX_RX_PIN, -1);   // -1 = no RTS/enable pin
+  pinMode(DMX_EN_PIN, OUTPUT);
+  digitalWrite(DMX_EN_PIN, HIGH);
+
   xTaskCreatePinnedToCore(dmxTask, "dmx_tx", 4096, nullptr, 5, nullptr, 1);
 }
 
