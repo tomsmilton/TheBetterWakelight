@@ -14,6 +14,18 @@ XLR on its edge, so any standard male→female 5-pin DMX lead connects the box
 to the lamp directly. The earlier screw-terminal variant is archived in
 `hardware/pcb/v1.0-terminal/`.
 
+## Wiring
+
+![WakeLight DMX output stage — ESP32 → THVD1410 RS-485 driver → female 5-pin XLR](docs/wiring-diagram.svg)
+
+The output stage is **transmit-only**: the THVD1410's receiver output (RO) is
+left unconnected, and DE + /RE are tied to GPIO21 — which the firmware holds
+HIGH so the driver is always enabled. A 680 Ω fail-safe bias pair (A→3V3,
+B→GND) keeps the idle bus in a defined state; the 120 Ω termination footprint
+is left unpopulated (DNP) because the PL60C terminates the far end. Everything
+runs from the on-board AMS1117 3.3 V rail (USB-C 5 V in). Full rationale in
+`docs/rs485-design-notes.md`.
+
 ## What's here
 
 | Path | What |
