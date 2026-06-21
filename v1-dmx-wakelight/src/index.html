@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wakelight</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f5f0e8;          /* warm paper */
+    --bg-grad: #ecdfcd;     /* top of page wash */
+    --panel: #fdfaf4;       /* card surface */
+    --panel2: #f2ead9;      /* input / nested surface */
+    --line: #d8ccb5;        /* warm divider */
+    --line-soft: #e6dbc7;
+    --text: #2b2620;        /* dark cocoa */
+    --muted: #8a7d6b;       /* warm grey */
+    --accent: #cc5500;      /* terracotta, Claude-ish */
+    --accent-warm: #d9724a;
+    --accent-ink: #ffffff;
+    --danger: #b64a3a;
+    --shadow: 0 1px 2px rgba(58, 43, 24, 0.06), 0 4px 14px rgba(58, 43, 24, 0.07);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; color: var(--text);
+    background: radial-gradient(1200px 700px at 10% -10%, var(--bg-grad), var(--bg) 55%);
+    background-attachment: fixed;
+    font: 16px/1.5 -apple-system, system-ui, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased; }
+  main { max-width: 560px; margin: 0 auto; padding: max(env(safe-area-inset-top), 20px) 18px 56px; }
+  h1 { font: 600 30px/1.1 ui-serif, "Iowan Old Style", "Apple Garamond", Georgia, serif;
+    letter-spacing: -0.01em; margin: 0 0 2px; color: var(--text); }
+  h1 a { color: inherit; text-decoration: none; }
+  h1 .mark { color: var(--accent); font-style: italic; font-weight: 500; }
+  .sub { color: var(--muted); font-size: 14px; margin-bottom: 20px; font-style: italic; }
+  .card { background: var(--panel); border: 1px solid var(--line-soft); border-radius: 14px;
+    padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .row { display: flex; gap: 10px; align-items: center; }
+  .row + .row { margin-top: 10px; }
+  label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+  input[type=time], input[type=number], input[type=text], select {
+    background: var(--panel2); border: 1px solid var(--line); color: var(--text);
+    border-radius: 8px; padding: 9px 10px; font: inherit; width: 100%;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  input[type=time]:focus, input[type=number]:focus, input[type=text]:focus, select:focus {
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(204, 85, 0, .14);
+  }
+  input[type=time] { min-width: 110px; }
+  input[type=number] { min-width: 80px; }
+  .wp {
+    background: var(--panel2); border: 1px solid var(--line-soft); border-radius: 10px; padding: 10px;
+    margin-bottom: 8px;
+  }
+  .wp-head { display: grid; grid-template-columns: auto 1fr 1fr auto; gap: 8px; align-items: end; }
+  .wp-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-top: 8px; }
+  .wp-body:empty { display: none; }
+  .wp label { display: block; margin-bottom: 4px; }
+  .wp-type {
+    background: var(--panel); color: var(--text); border: 1px solid var(--line);
+    border-radius: 8px; padding: 8px 10px; font-size: 16px; line-height: 1;
+    box-shadow: none; cursor: default; min-width: 38px;
+  }
+  .wp[data-type=fx] .wp-type { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  button {
+    background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px;
+    padding: 10px 18px; font: inherit; font-weight: 600; cursor: pointer;
+    box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 10px rgba(204, 85, 0, .15);
+    transition: transform .1s, box-shadow .1s;
+  }
+  button:active { transform: translateY(1px); }
+  button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); font-weight: 500;
+    box-shadow: none; }
+  button.ghost:hover { background: var(--panel2); }
+  button.del { background: transparent; color: var(--danger); border: 1px solid var(--line);
+    padding: 8px 10px; box-shadow: none; border-radius: 8px; }
+  button.del:hover { background: rgba(182, 74, 58, .08); }
+  button.link { background: transparent; color: var(--muted); border: 1px solid var(--line);
+    padding: 8px 12px; box-shadow: none; border-radius: 8px; font-weight: 500; }
+  button.link:hover { background: var(--panel2); }
+  button.link.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  button#save.dirty { box-shadow: 0 0 0 3px rgba(204, 85, 0, .25), 0 2px 10px rgba(204, 85, 0, .15); }
+  button#save.dirty::before { content: "• "; }
+  .cct-wrap { position: relative; }
+  .cct-swatch { position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--line);
+    pointer-events: none; }
+  .cct-wrap input[type=number] { padding-right: 32px; }
+  .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; flex-wrap: wrap; }
+  .toggle { display: flex; align-items: center; gap: 10px; }
+  .toggle input { width: 22px; height: 22px; accent-color: var(--accent); }
+  .nav { margin-bottom: 18px; }
+  .nav a {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--panel); color: var(--accent);
+    text-decoration: none; border: 1px solid var(--line-soft); padding: 8px 14px;
+    border-radius: 999px; font-size: 13px; font-weight: 500;
+    box-shadow: var(--shadow);
+    transition: transform .1s;
+  }
+  .nav a:hover { transform: translateX(2px); }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .seg button {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--line-soft);
+    font-weight: 500; padding: 12px; border-radius: 10px; box-shadow: none;
+  }
+  .seg button:hover { background: #ead9b9; }
+  .seg button.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .dismiss-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+  .dismiss-row button:disabled { opacity: .55; cursor: default; }
+  .dismiss-note { color: var(--muted); font-size: 12px; font-style: italic; }
+  .graph { display: block; width: 100%; height: 160px; margin-bottom: 12px;
+    background: var(--panel2); border: 1px solid var(--line-soft); border-radius: 10px;
+    overflow: hidden; }
+  .graph .axis { stroke: var(--line); stroke-width: 1; }
+  .graph .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; opacity: .5; }
+  .graph .label { fill: var(--muted); font: 10px -apple-system, system-ui, sans-serif; }
+  .graph .b-area { fill: var(--accent); opacity: .16; }
+  .graph .b-line { fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linejoin: round; }
+  .graph .k-line { fill: none; stroke: #5a4a36; stroke-width: 1.4; stroke-dasharray: 4 3; stroke-linejoin: round; opacity: .55; }
+  .graph .fx-mark { fill: var(--accent); stroke: var(--bg); stroke-width: 1; }
+  .graph .fx-tick { stroke: var(--accent); stroke-width: 1.2; opacity: .6; stroke-dasharray: 1 3; }
+  .status-pill {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--panel); border: 1px solid var(--line-soft); border-radius: 12px;
+    padding: 10px 14px; margin-bottom: 16px; font-size: 13px;
+    box-shadow: var(--shadow);
+  }
+  .status-pill .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: 0 0 8px;
+  }
+  .status-pill .dot.ramping  { background: var(--accent); animation: pulse 1.4s ease-in-out infinite; }
+  .status-pill .dot.holding  { background: var(--accent); }
+  .status-pill .dot.on       { background: var(--accent); }
+  .status-pill .dot.off      { background: #b5b0a6; }
+  .status-pill .dot.manual   { background: #6a8f3a; }
+  .status-pill .dot.dismissed{ background: #b5b0a6; }
+  .status-pill .dot.idle     { background: #b5b0a6; }
+  .status-pill .dot.no_time  { background: var(--danger); }
+  .status-pill .label { font-weight: 600; color: var(--text); text-transform: capitalize; }
+  .status-pill .detail { color: var(--muted); }
+  .status-pill .time { color: var(--muted); margin-left: auto; font-variant-numeric: tabular-nums; }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+    background: var(--text); border: 1px solid var(--text); color: var(--panel);
+    padding: 10px 16px; border-radius: 999px; opacity: 0; transition: opacity .2s;
+    box-shadow: var(--shadow); pointer-events: none; font-size: 13px; }
+  .toast.on { opacity: 1; }
+</style>
+</head>
+<body>
+<main>
+  <h1><a href="http://wakelight.local/" title="all wakelights on this network">Wake<span class="mark">light</span></a></h1>
+  <div class="sub" id="sub">loading…</div>
+  <div class="card" id="deviceCard">
+    <label for="deviceName" style="display:block;margin-bottom:6px">This lamp</label>
+    <div class="row">
+      <input type="text" id="deviceName" maxlength="48" placeholder="Bedroom">
+      <button class="ghost" id="deviceSave">save</button>
+    </div>
+    <div class="dismiss-note" id="deviceUrl" style="margin-top:8px"></div>
+  </div>
+  <div class="status-pill" id="status">…</div>
+  <div class="nav"><a href="/live">Live control →</a></div>
+
+  <div class="card">
+    <label style="display:block;margin-bottom:8px">Override</label>
+    <div class="seg" id="override">
+      <button data-mode="auto">Auto</button>
+      <button data-mode="on">On</button>
+      <button data-mode="off">Off</button>
+    </div>
+    <div class="dismiss-row">
+      <button class="ghost" id="dismiss">Done for today</button>
+      <span class="dismiss-note" id="dismissNote"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="toggle">
+      <input type="checkbox" id="enabled">
+      <label for="enabled" style="font-size:14px;text-transform:none;color:var(--text);">Schedule enabled</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <svg class="graph" id="graph" viewBox="0 0 520 160" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <div id="points"></div>
+    <div class="actions">
+      <button class="link" id="link" title="link times: shift all when one moves" aria-pressed="false">🔗 link times</button>
+      <button class="ghost" id="defaultRamp">default ramp</button>
+      <button class="ghost" id="add">+ light</button>
+      <button class="ghost" id="addFx">+ effect</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="ghost" id="reload">reload</button>
+    <button id="save">save</button>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const ptsEl = $('#points');
+let state = { enabled: false, points: [] };
+let linked = false;
+let dirty = false;
+
+// Effect parameter primitives (n+3..n+8 raw bytes). hint is just a tooltip;
+// the wire format is always 0–255 per byte.
+const P = {
+  cct:       { label: 'CCT',        hint: '0–255 → 2500K–10000K',                  def: 128 },
+  cct2:      { label: 'CCT 2',      hint: '0–255 → 2500K–10000K',                  def: 200 },
+  gm:        { label: 'G/M',        hint: '0=−50, 128=0, 255=+50',                 def: 128 },
+  hue:       { label: 'Hue',        hint: '0–255 → 0°–360°',                       def: 0   },
+  hue2:      { label: 'Hue 2',      hint: '0–255 → 0°–360°',                       def: 128 },
+  sat:       { label: 'Saturation', hint: '0–255 → 0–100%',                        def: 255 },
+  pace:      { label: 'Pace',       hint: '0–100 in 10-byte steps → 1–10',         def: 50  },
+  rate:      { label: 'Rate',       hint: '0–100 in 10-byte steps → 1–10',         def: 50  },
+  ember:     { label: 'Ember',      hint: '0–100 in 10-byte steps → 1–10',         def: 50  },
+  br2:       { label: 'Brightness', hint: '0–255 → 0–100% (effect-internal)',      def: 255 },
+  start:     { label: 'Stop/Start', hint: '0=stop, 60=start',                      def: 60  },
+  copColors: { label: 'Colours',    hint: '0=R, 10=B, 20=R/B, 30=W/B, 40=R/W/B',   def: 40  },
+  fwMode:    { label: 'Mode',       hint: '0=single, 100=coloured, 200=mixed',     def: 100 },
+  intPick:   { label: 'Picking',    hint: '0–127=CCT mode, 128–255=HSI mode',      def: 0   },
+  intColor:  { label: 'CCT/Hue',    hint: 'CCT (when picking<128) or Hue',         def: 128 },
+};
+
+// Effect catalog. Order and ids must match FX_TABLE in src/schedule.c.
+const FX = [
+  { id: 'lightning',      name: 'Lightning',      params: [P.cct, P.rate, P.start] },
+  { id: 'paparazzi',      name: 'Paparazzi',      params: [P.cct, P.gm, P.pace, P.start] },
+  { id: 'defective_bulb', name: 'Defective bulb', params: [P.cct, P.gm, P.pace, P.start] },
+  { id: 'explosion',      name: 'Explosion',      params: [P.cct, P.gm, P.pace, P.ember, P.start] },
+  { id: 'welding',        name: 'Welding',        params: [P.br2, P.cct, P.gm, P.pace, P.start] },
+  { id: 'cct_flash',      name: 'CCT flash',      params: [P.cct, P.gm, P.pace, P.start] },
+  { id: 'hue_flash',      name: 'Hue flash',      params: [P.hue, P.sat, P.pace, P.start] },
+  { id: 'cct_pulse',      name: 'CCT pulse',      params: [P.cct, P.gm, P.pace, P.start] },
+  { id: 'hue_pulse',      name: 'Hue pulse',      params: [P.hue, P.sat, P.pace, P.start] },
+  { id: 'cop_car',        name: 'Cop car',        params: [P.copColors, P.pace, P.start] },
+  { id: 'candlelight',    name: 'Candlelight',    params: [P.br2, P.cct, P.gm, P.pace, P.ember, P.start] },
+  { id: 'hue_loop',       name: 'Hue loop',       params: [P.hue, P.hue2, P.pace, P.start] },
+  { id: 'cct_loop',       name: 'CCT loop',       params: [P.cct, P.cct2, P.pace, P.start] },
+  { id: 'int_loop',       name: 'Intensity loop', params: [P.intPick, P.br2, P.intColor, P.rate, P.start] },
+  { id: 'tv_screen',      name: 'TV screen',      params: [P.br2, P.cct, P.gm, P.pace, P.start] },
+  { id: 'fireworks',      name: 'Fireworks',      params: [P.fwMode, P.rate, P.ember, P.start] },
+  { id: 'party',          name: 'Party',          params: [P.fwMode, P.rate, P.start] },
+];
+const FX_BY_ID = Object.fromEntries(FX.map(f => [f.id, f]));
+const FX_NAME = id => (FX_BY_ID[id] && FX_BY_ID[id].name) || id;
+
+function defaultParams(fxId) {
+  const def = FX_BY_ID[fxId] || FX[0];
+  const out = [0, 0, 0, 0, 0, 0];
+  def.params.forEach((p, i) => out[i] = p.def);
+  return out;
+}
+
+function cctColor(k) {
+  const t = Math.max(0, Math.min(1, (k - 2500) / 7500));
+  if (t < 0.15) return '#ffb070';
+  if (t < 0.35) return '#ffd9a6';
+  if (t < 0.55) return '#fff5d0';
+  if (t < 0.75) return '#e9efff';
+  return '#bfd5ff';
+}
+
+function setDirty(v) {
+  dirty = v;
+  $('#save').classList.toggle('dirty', v);
+}
+
+function modToHHMM(m) {
+  const h = Math.floor(m / 60), mm = m % 60;
+  return `${String(h).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+}
+function hhmmToMod(v) {
+  const [h, m] = v.split(':').map(Number);
+  return (h * 60 + m) | 0;
+}
+
+function isFx(p) { return p.t === 'fx'; }
+
+function renderGraph() {
+  const g = $('#graph');
+  const pts = [...state.points].sort((a, b) => a.m - b.m);
+  const W = 520, H = 160, PAD_L = 44, PAD_R = 52, PAD_T = 12, PAD_B = 24;
+  if (pts.length < 2) {
+    g.innerHTML = `<text class="label" x="${W/2}" y="${H/2}" text-anchor="middle">add 2+ waypoints to see the ramp</text>`;
+    return;
+  }
+  const t0 = pts[0].m, t1 = pts[pts.length - 1].m;
+  const span = Math.max(1, t1 - t0);
+  const x = m => PAD_L + (W - PAD_L - PAD_R) * (m - t0) / span;
+  const yB = b => H - PAD_B - (H - PAD_T - PAD_B) * b / 100;
+  const yK = k => H - PAD_B - (H - PAD_T - PAD_B) * (k - 2500) / 7500;
+  const bLine = pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.m).toFixed(1)},${yB(p.b).toFixed(1)}`).join(' ');
+  const bArea = `${bLine} L${x(t1).toFixed(1)},${(H - PAD_B).toFixed(1)} L${x(t0).toFixed(1)},${(H - PAD_B).toFixed(1)} Z`;
+  // CCT polyline only spans CCT-typed points; an FX point breaks the line.
+  let kSegs = '', cur = '';
+  pts.forEach(p => {
+    if (isFx(p)) { if (cur) { kSegs += cur + ' '; cur = ''; } return; }
+    cur += `${cur ? 'L' : 'M'}${x(p.m).toFixed(1)},${yK(p.k).toFixed(1)} `;
+  });
+  if (cur) kSegs += cur;
+  const dots = pts.map(p => {
+    if (isFx(p)) {
+      // FX waypoint: square mark on the brightness curve + dashed vertical
+      // tick down to the time axis to make discontinuities easy to spot.
+      const cx = x(p.m).toFixed(1), cy = yB(p.b).toFixed(1);
+      return `<line class="fx-tick" x1="${cx}" y1="${cy}" x2="${cx}" y2="${(H - PAD_B).toFixed(1)}"/>` +
+             `<rect class="fx-mark" x="${cx - 4}" y="${cy - 4}" width="8" height="8" rx="1"/>`;
+    }
+    return `<circle cx="${x(p.m).toFixed(1)}" cy="${yB(p.b).toFixed(1)}" r="3" fill="${cctColor(p.k)}" stroke="var(--bg)" stroke-width="1"/>`;
+  }).join('');
+  const xLabels = pts.map(p =>
+    `<text class="label" x="${x(p.m).toFixed(1)}" y="${H - 6}" text-anchor="middle">${modToHHMM(p.m)}</text>`
+  ).join('');
+  g.innerHTML = `
+    <line class="grid" x1="${PAD_L}" y1="${yB(100)}" x2="${W - PAD_R}" y2="${yB(100)}"/>
+    <line class="grid" x1="${PAD_L}" y1="${yB(50)}"  x2="${W - PAD_R}" y2="${yB(50)}"/>
+    <line class="axis" x1="${PAD_L}" y1="${H - PAD_B}" x2="${W - PAD_R}" y2="${H - PAD_B}"/>
+    <text class="label" x="${PAD_L - 6}" y="${yB(100) + 3}" text-anchor="end">100%</text>
+    <text class="label" x="${PAD_L - 6}" y="${yB(0) + 3}"   text-anchor="end">0%</text>
+    <text class="label" x="${W - PAD_R + 6}" y="${yK(10000) + 3}" text-anchor="start">10k</text>
+    <text class="label" x="${W - PAD_R + 6}" y="${yK(2500) + 3}"  text-anchor="start">2.5k</text>
+    <path class="b-area" d="${bArea}"/>
+    <path class="b-line" d="${bLine}"/>
+    <path class="k-line" d="${kSegs}"/>
+    ${dots}
+    ${xLabels}
+  `;
+}
+
+function bodyForCct(p) {
+  return `<div class="cct-wrap"><label>colour K</label>` +
+    `<input type="number" min="2500" max="10000" step="50" value="${p.k}" data-k="k">` +
+    `<span class="cct-swatch" style="background:${cctColor(p.k)}"></span></div>`;
+}
+
+function bodyForFx(p) {
+  const fx = FX_BY_ID[p.fx] || FX[0];
+  const opts = FX.map(e =>
+    `<option value="${e.id}"${e.id === p.fx ? ' selected' : ''}>${e.name}</option>`
+  ).join('');
+  const params = fx.params.map((pp, i) =>
+    `<div><label>${pp.label}</label>` +
+    `<input type="number" min="0" max="255" value="${(p.p && p.p[i]) || 0}" data-k="p${i}" title="${pp.hint}"></div>`
+  ).join('');
+  return `<div><label>effect</label><select data-k="fx">${opts}</select></div>${params}`;
+}
+
+function render() {
+  ptsEl.innerHTML = '';
+  state.points.forEach((p, i) => {
+    const d = document.createElement('div');
+    d.className = 'wp';
+    d.dataset.type = isFx(p) ? 'fx' : 'cct';
+    d.innerHTML = `
+      <div class="wp-head">
+        <button class="wp-type" type="button" title="${isFx(p) ? 'Effect' : 'Light'}">${isFx(p) ? '✨' : '💡'}</button>
+        <div><label>time</label><input type="time" value="${modToHHMM(p.m)}" data-k="m"></div>
+        <div><label>bright %</label><input type="number" min="0" max="100" value="${p.b}" data-k="b"></div>
+        <button class="del" title="remove">✕</button>
+      </div>
+      <div class="wp-body">${isFx(p) ? bodyForFx(p) : bodyForCct(p)}</div>
+    `;
+    const onChange = (inp) => {
+      const k = inp.dataset.k;
+      if (k === 'm') {
+        const next = hhmmToMod(inp.value);
+        if (linked && state.points.length > 1) {
+          let delta = next - p.m;
+          const lo = Math.min(...state.points.map(q => q.m));
+          const hi = Math.max(...state.points.map(q => q.m));
+          delta = Math.max(-lo, Math.min(1439 - hi, delta));
+          state.points.forEach(q => { q.m = q.m + delta; });
+          render();
+        } else {
+          p.m = next;
+          renderGraph();
+        }
+      } else if (k === 'b') {
+        p.b = Number(inp.value);
+        renderGraph();
+      } else if (k === 'k') {
+        p.k = Number(inp.value);
+        const sw = d.querySelector('.cct-swatch');
+        if (sw) sw.style.background = cctColor(p.k);
+        renderGraph();
+      } else if (k === 'fx') {
+        p.fx = inp.value;
+        // Re-seed params with the new effect's defaults so labels match.
+        p.p = defaultParams(p.fx);
+        render();
+      } else if (k && k.startsWith('p')) {
+        const idx = parseInt(k.slice(1), 10);
+        if (!p.p) p.p = [0, 0, 0, 0, 0, 0];
+        let v = Number(inp.value) | 0;
+        if (v < 0) v = 0;
+        if (v > 255) v = 255;
+        p.p[idx] = v;
+      }
+      setDirty(true);
+    };
+    d.querySelectorAll('input, select').forEach(inp => {
+      inp.addEventListener('change', () => onChange(inp));
+    });
+    d.querySelector('.del').addEventListener('click', () => {
+      state.points.splice(i, 1); render(); setDirty(true);
+    });
+    ptsEl.appendChild(d);
+  });
+  $('#enabled').checked = !!state.enabled;
+  renderGraph();
+}
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('on'), 1500);
+}
+
+function normalisePoint(p) {
+  if (p.t === 'fx') {
+    const fx = FX_BY_ID[p.fx] ? p.fx : 'lightning';
+    const params = (p.p && Array.isArray(p.p)) ? p.p.slice(0, 6) : defaultParams(fx);
+    while (params.length < 6) params.push(0);
+    return { m: p.m, b: p.b, t: 'fx', fx, p: params };
+  }
+  return { m: p.m, b: p.b, k: p.k != null ? p.k : 4000 };
+}
+
+async function load() {
+  const r = await fetch('/api/schedule');
+  const j = await r.json();
+  state.enabled = !!j.enabled;
+  state.points = (j.points || []).map(normalisePoint);
+  render();
+  setDirty(false);
+}
+
+async function save() {
+  state.enabled = $('#enabled').checked;
+  const body = JSON.stringify({
+    enabled: state.enabled,
+    points: state.points.map(p => {
+      if (isFx(p)) {
+        return { m: p.m|0, b: p.b|0, t: 'fx', fx: p.fx, p: (p.p || [0,0,0,0,0,0]).slice(0,6).map(v => v|0) };
+      }
+      return { m: p.m|0, b: p.b|0, k: p.k|0 };
+    }),
+  });
+  const r = await fetch('/api/schedule', {
+    method: 'PUT', headers: {'Content-Type': 'application/json'}, body,
+  });
+  if (!r.ok) { toast('save failed'); return; }
+  const j = await r.json();
+  state.enabled = !!j.enabled;
+  state.points = (j.points || []).map(normalisePoint);
+  render();
+  setDirty(false);
+  toast('saved');
+}
+
+function setOverrideUI(mode) {
+  document.querySelectorAll('#override button').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+}
+async function setOverride(mode) {
+  setOverrideUI(mode);
+  try {
+    await fetch('/api/override', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ mode }),
+    });
+  } catch (e) { toast('override failed'); }
+}
+document.querySelectorAll('#override button').forEach(b => {
+  b.addEventListener('click', () => setOverride(b.dataset.mode));
+});
+
+async function dismissToday() {
+  if (!confirm('Done for today? The schedule will not run again until tomorrow.')) return;
+  try {
+    await fetch('/api/dismiss', { method: 'POST' });
+    tickStatus();
+  } catch (e) { toast('dismiss failed'); }
+}
+$('#dismiss').addEventListener('click', dismissToday);
+
+$('#add').addEventListener('click', () => {
+  const last = state.points[state.points.length - 1];
+  const base = last ? last.m + 15 : 7 * 60;
+  state.points.push({
+    m: Math.min(base, 1439),
+    b: last ? Math.min(100, (last.b|0) + 20) : 50,
+    k: (last && !isFx(last)) ? last.k : 4000,
+  });
+  render();
+  setDirty(true);
+});
+$('#addFx').addEventListener('click', () => {
+  const last = state.points[state.points.length - 1];
+  const base = last ? last.m + 15 : 7 * 60;
+  state.points.push({
+    m: Math.min(base, 1439),
+    b: last ? (last.b|0) : 80,
+    t: 'fx', fx: 'lightning', p: defaultParams('lightning'),
+  });
+  render();
+  setDirty(true);
+});
+$('#enabled').addEventListener('change', () => setDirty(true));
+const DEFAULT_RAMP = [
+  { m: 6*60+30, b: 0,   k: 2500 },
+  { m: 6*60+40, b: 10,  k: 3000 },
+  { m: 6*60+50, b: 30,  k: 3000 },
+  { m: 6*60+55, b: 50,  k: 3000 },
+  { m: 7*60+0,  b: 100, k: 3000 },
+];
+$('#defaultRamp').addEventListener('click', () => {
+  if (state.points.length && !confirm('Replace current waypoints with the default ramp?')) return;
+  state.points = DEFAULT_RAMP.map(p => ({ ...p }));
+  render();
+  setDirty(true);
+});
+$('#reload').addEventListener('click', load);
+$('#save').addEventListener('click', save);
+$('#link').addEventListener('click', () => {
+  linked = !linked;
+  const b = $('#link');
+  b.classList.toggle('active', linked);
+  b.setAttribute('aria-pressed', linked ? 'true' : 'false');
+});
+
+async function loadDevice() {
+  try {
+    const r = await fetch('/api/device');
+    const j = await r.json();
+    $('#deviceName').value = j.name || '';
+    const parts = [`Reach me at ${j.hostname}.local`];
+    if (j.slug && j.slug !== j.hostname) {
+      parts.push(`(wanted ${j.slug}.local — taken by another device)`);
+    }
+    if (j.holds_wakelight && j.hostname !== 'wakelight') {
+      parts.push('— also serves wakelight.local');
+    }
+    $('#deviceUrl').textContent = parts.join(' ');
+    document.title = `Wakelight — ${j.name || j.hostname}`;
+  } catch (e) { /* offline ok */ }
+}
+async function saveDevice() {
+  const name = $('#deviceName').value.trim();
+  if (!name) { toast('name required'); return; }
+  const r = await fetch('/api/device', {
+    method: 'PUT', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ name }),
+  });
+  if (r.status === 409) { toast('name taken by another lamp'); return; }
+  if (!r.ok) { toast('rename failed'); return; }
+  await loadDevice();
+  toast('renamed');
+}
+$('#deviceSave').addEventListener('click', saveDevice);
+loadDevice();
+
+function describeState(j) {
+  if (j.fx && j.fx_id) {
+    const name = FX_NAME(j.fx_id);
+    const detail = `${j.brightness_pct}% · ${name}`;
+    if (j.state === 'ramping') return { label: 'Effect', detail: `→ ${detail}` };
+    if (j.state === 'holding') return { label: 'Effect', detail };
+  }
+  const out = `${j.brightness_pct}% @ ${j.cct_k} K`;
+  switch (j.state) {
+    case 'ramping':   return { label: 'Ramping',   detail: `→ ${out}` };
+    case 'holding':   return { label: 'Holding',   detail: `at ${out}` };
+    case 'manual':    return { label: 'Manual',    detail: out };
+    case 'on':        return { label: 'On',        detail: out };
+    case 'off':       return { label: 'Off',       detail: '' };
+    case 'dismissed': return { label: 'Done',      detail: 'resumes tomorrow' };
+    case 'idle':      return { label: 'Idle',      detail: 'waiting for next ramp' };
+    case 'no_time':   return { label: 'No time',   detail: 'waiting for sync' };
+    default:          return { label: j.state || '—', detail: '' };
+  }
+}
+
+async function tickStatus() {
+  try {
+    const r = await fetch('/api/status');
+    const j = await r.json();
+    const { label, detail } = describeState(j);
+    const time = j.now ? j.now.split(' ')[1] : '';
+    $('#status').innerHTML =
+      `<span class="dot ${j.state}"></span>` +
+      `<span class="label">${label}</span>` +
+      (detail ? `<span class="detail">${detail}</span>` : '') +
+      `<span class="time">${time}</span>`;
+    $('#sub').textContent = j.time_valid ? 'connected' : 'waiting for time sync';
+    if (j.override) setOverrideUI(j.override);
+    const dismissed = !!j.dismissed;
+    const btn = $('#dismiss');
+    btn.disabled = dismissed;
+    btn.textContent = dismissed ? 'Done ✓' : 'Done for today';
+    $('#dismissNote').textContent = dismissed ? 'schedule off · resumes tomorrow' : '';
+  } catch (e) {
+    $('#status').textContent = 'status unavailable';
+  }
+}
+
+load();
+tickStatus();
+setInterval(tickStatus, 5000);
+</script>
+</body>
+</html>

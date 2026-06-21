@@ -1,0 +1,18 @@
+# PlatformIO build output
+firmware/.pio/
+
+# KiCad backups / locks / caches
+*.kicad_pcb-bak
+*-backups/
+*.lck
+fp-info-cache
+
+# macOS
+.DS_Store
+
+# generated meshes (regenerate: python3 hardware/pcb/export_stl.py)
+# ...but keep the enclosure deliverables tracked so they download / 3D-preview on GitHub
+*.stl
+!hardware/pcb/enclosure_box.stl
+!hardware/pcb/enclosure_lid.stl
+enclosure_stl.zip

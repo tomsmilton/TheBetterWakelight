@@ -1,0 +1,11 @@
+.pio/
+.vscode/
+.claude/
+.DS_Store
+logs/
+sdkconfig.defaults.*
+src/wifi_secrets.h
+src/index_html.c
+src/live_html.c
+managed_components/
+dependencies.lock

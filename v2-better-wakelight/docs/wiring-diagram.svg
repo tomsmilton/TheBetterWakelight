@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 800" width="1300" height="800">
+  <rect x="0" y="0" width="1300" height="800" fill="#ffffff"/>
+  <g font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+
+    <!-- ============================ wires ============================ -->
+    <!-- (drawn first so the pin dots sit on top; attrs inlined per-path) -->
+    <!-- +3V3 rail: ESP 3V3 -> THVD VCC -->
+    <path d="M350,300 L500,300" fill="none" stroke="#e23b2e" stroke-width="4" stroke-linecap="round"/>
+    <!-- DI: GPIO17 -> THVD DI -->
+    <path d="M350,470 L500,470" fill="none" stroke="#2fa84f" stroke-width="4" stroke-linecap="round"/>
+    <!-- DE + /RE tied: GPIO21 -> bracket -> THVD /RE & DE -->
+    <path d="M350,545 L452,545" fill="none" stroke="#7b61ff" stroke-width="4" stroke-linecap="round"/>
+    <path d="M452,520 L452,565" fill="none" stroke="#7b61ff" stroke-width="4" stroke-linecap="round"/>
+    <path d="M452,520 L500,520" fill="none" stroke="#7b61ff" stroke-width="4" stroke-linecap="round"/>
+    <path d="M452,565 L500,565" fill="none" stroke="#7b61ff" stroke-width="4" stroke-linecap="round"/>
+    <!-- GND: ESP GND -> THVD GND, branch down and across to XLR pin 1 -->
+    <path d="M350,625 L500,625" fill="none" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/>
+    <path d="M430,625 L430,735 L970,735 L970,610 L1000,610" fill="none" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>
+    <!-- A (D+): THVD -> XLR pin 3 -->
+    <path d="M800,460 L1000,460" fill="none" stroke="#2f88e0" stroke-width="4" stroke-linecap="round"/>
+    <!-- B (D-): THVD -> XLR pin 2 -->
+    <path d="M800,540 L1000,540" fill="none" stroke="#f0a020" stroke-width="4" stroke-linecap="round"/>
+    <!-- fail-safe bias: 680R on A -> +3V3 -->
+    <path d="M855,460 L855,396" fill="none" stroke="#e23b2e" stroke-width="4" stroke-linecap="round"/>
+    <path d="M855,360 L855,346" fill="none" stroke="#e23b2e" stroke-width="4" stroke-linecap="round"/>
+    <!-- fail-safe bias: 680R on B -> GND -->
+    <path d="M855,540 L855,604" fill="none" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/>
+    <path d="M855,640 L855,652" fill="none" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/>
+    <!-- 120R termination across A-B (DNP) -->
+    <path d="M905,460 L905,482" fill="none" stroke="#9a9a93" stroke-width="3" stroke-dasharray="6 6"/>
+    <path d="M905,518 L905,540" fill="none" stroke="#9a9a93" stroke-width="3" stroke-dasharray="6 6"/>
+
+    <!-- ===================== bias / term resistors ===================== -->
+    <!-- 680R pull-up to +3V3 (on A / Data+) -->
+    <rect x="846" y="360" width="18" height="36" rx="3" fill="#ffffff" stroke="#e23b2e" stroke-width="2"/>
+    <text x="872" y="383" font-size="14" fill="#2b2b2b">680&#937;</text>
+    <path d="M841,346 L869,346" stroke="#e23b2e" stroke-width="3"/>
+    <text x="855" y="338" font-size="13" fill="#e23b2e" text-anchor="middle">+3V3</text>
+
+    <!-- 680R pull-down to GND (on B / Data-) -->
+    <rect x="846" y="604" width="18" height="36" rx="3" fill="#ffffff" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="872" y="627" font-size="14" fill="#2b2b2b">680&#937;</text>
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linecap="round">
+      <path d="M843,652 L867,652"/>
+      <path d="M847,658 L863,658"/>
+      <path d="M851,664 L859,664"/>
+    </g>
+
+    <!-- 120R termination (Do Not Populate) -->
+    <rect x="896" y="482" width="18" height="36" rx="3" fill="#ffffff" stroke="#9a9a93" stroke-width="2" stroke-dasharray="5 4"/>
+    <text x="922" y="497" font-size="13" fill="#7a7a73">120&#937;</text>
+    <text x="922" y="514" font-size="13" fill="#7a7a73">DNP</text>
+
+    <!-- ============================ boxes ============================ -->
+    <!-- ESP32 -->
+    <rect x="50" y="70" width="300" height="620" rx="18" fill="#f4f4f0" stroke="#e2e2dc" stroke-width="2"/>
+    <text x="200" y="150" font-size="34" font-weight="700" fill="#1a1a1a" text-anchor="middle">ESP32</text>
+    <text x="200" y="186" font-size="17" fill="#6b6b66" text-anchor="middle">ESP32-WROOM-32E</text>
+
+    <!-- THVD1410 -->
+    <rect x="500" y="250" width="300" height="400" rx="18" fill="#f4f4f0" stroke="#e2e2dc" stroke-width="2"/>
+    <text x="650" y="328" font-size="30" font-weight="700" fill="#1a1a1a" text-anchor="middle">THVD1410</text>
+    <text x="650" y="360" font-size="16" fill="#6b6b66" text-anchor="middle">RS-485 driver &#183; 3.3 V</text>
+
+    <!-- DMX XLR -->
+    <rect x="1000" y="320" width="300" height="380" rx="18" fill="#f4f4f0" stroke="#e2e2dc" stroke-width="2"/>
+    <text x="1150" y="378" font-size="30" font-weight="700" fill="#1a1a1a" text-anchor="middle">DMX OUT</text>
+    <text x="1150" y="408" font-size="16" fill="#6b6b66" text-anchor="middle">5-pin XLR &#183; female</text>
+
+    <!-- ============================ pins ============================ -->
+    <!-- ESP32 right-edge pins -->
+    <g font-size="19" fill="#2b2b2b" text-anchor="end">
+      <text x="335" y="305">3V3</text>
+      <text x="335" y="475">GPIO17</text>
+      <text x="335" y="550">GPIO21</text>
+      <text x="335" y="630">GND</text>
+    </g>
+    <circle cx="350" cy="300" r="7" fill="#e23b2e"/>
+    <circle cx="350" cy="470" r="7" fill="#2fa84f"/>
+    <circle cx="350" cy="545" r="7" fill="#7b61ff"/>
+    <circle cx="350" cy="625" r="7" fill="#1a1a1a"/>
+
+    <!-- THVD left-edge pins -->
+    <g font-size="18" fill="#2b2b2b" text-anchor="start">
+      <text x="515" y="305">VCC</text>
+      <text x="515" y="475">DI</text>
+      <text x="515" y="525">/RE</text>
+      <text x="515" y="570">DE</text>
+      <text x="515" y="630">GND</text>
+    </g>
+    <circle cx="500" cy="300" r="7" fill="#e23b2e"/>
+    <circle cx="500" cy="470" r="7" fill="#2fa84f"/>
+    <circle cx="500" cy="520" r="7" fill="#7b61ff"/>
+    <circle cx="500" cy="565" r="7" fill="#7b61ff"/>
+    <circle cx="500" cy="625" r="7" fill="#1a1a1a"/>
+    <!-- RO unconnected -->
+    <circle cx="500" cy="410" r="7" fill="#ffffff" stroke="#b9b9b3" stroke-width="2"/>
+    <text x="515" y="415" font-size="18" fill="#9a9a93">RO &#183; n/c</text>
+
+    <!-- THVD right-edge pins (A/B out) -->
+    <g font-size="18" fill="#2b2b2b" text-anchor="end">
+      <text x="785" y="455">A</text>
+      <text x="785" y="535">B</text>
+    </g>
+    <circle cx="800" cy="460" r="7" fill="#2f88e0"/>
+    <circle cx="800" cy="540" r="7" fill="#f0a020"/>
+
+    <!-- junction dots: bias + termination taps on A/B, and GND branch -->
+    <circle cx="855" cy="460" r="5" fill="#2f88e0"/>
+    <circle cx="855" cy="540" r="5" fill="#f0a020"/>
+    <circle cx="905" cy="460" r="5" fill="#2f88e0"/>
+    <circle cx="905" cy="540" r="5" fill="#f0a020"/>
+    <circle cx="430" cy="625" r="5" fill="#1a1a1a"/>
+
+    <!-- XLR left-edge pins -->
+    <circle cx="1000" cy="460" r="7" fill="#2f88e0"/>
+    <circle cx="1000" cy="540" r="7" fill="#f0a020"/>
+    <circle cx="1000" cy="610" r="7" fill="#1a1a1a"/>
+    <circle cx="1000" cy="655" r="7" fill="#ffffff" stroke="#b9b9b3" stroke-width="2"/>
+    <circle cx="1000" cy="692" r="7" fill="#ffffff" stroke="#b9b9b3" stroke-width="2"/>
+    <g font-size="18" text-anchor="start">
+      <text x="1018" y="465" fill="#2b2b2b">Pin 3 &#183; Data+</text>
+      <text x="1018" y="545" fill="#2b2b2b">Pin 2 &#183; Data&#8722;</text>
+      <text x="1018" y="615" fill="#2b2b2b">Pin 1 &#183; GND</text>
+      <text x="1018" y="660" fill="#9a9a93">Pin 4 &#183; n/c</text>
+      <text x="1018" y="697" fill="#9a9a93">Pin 5 &#183; n/c</text>
+    </g>
+
+    <!-- DE//RE tie note -->
+    <text x="650" y="612" font-size="13" fill="#7b61ff" text-anchor="middle">DE + /RE tied &#183; 10k pull-up to 3V3</text>
+
+    <!-- ============================ footnotes ============================ -->
+    <g font-size="15" fill="#6b6b66">
+      <text x="50" y="758">Transmit-only: RO unconnected &#183; DE + /RE tied to GPIO21 &#183; firmware holds GPIO21 HIGH so the driver is always enabled.</text>
+      <text x="50" y="782">680&#937; fail-safe bias (A&#8594;3V3, B&#8594;GND) &#183; 120&#937; termination not fitted &#8212; the PL60C terminates the bus &#183; +3V3 from on-board AMS1117 (USB-C 5 V in).</text>
+    </g>
+
+  </g>
+</svg>
