@@ -1,82 +1,135 @@
-# WakeLight — DMX sunrise controller for the Neewer PL60C
+# The Better WakeLight (V2)
 
-An ESP32 that plugs into the PL60C's 5-pin DMX-IN and ramps it from black to
-full daylight before your alarm, configured from a phone-friendly web portal
-on your home Wi-Fi.
+A small ESP32 board that plugs into a **Neewer PL60C** LED panel's 5-pin DMX‑IN
+and ramps it from black to full daylight before your alarm — a sunrise lamp you
+configure from a phone-friendly web page on your home Wi‑Fi.
+
+> [!WARNING]
+> **This firmware is rough bring‑up firmware, not a polished release.**
+> It works — the DMX output stage is fixed and bench‑tested — but it has not
+> been refined or cleaned up. A nicer, **prettier firmware is likely coming in
+> July 2026**. If you want the tidy version, check back then. What's here is
+> enough to build the board and make the lamp do a sunrise today.
+
+![WakeLight v1.1 board (top)](hardware/pcb/render_top.png)
+
+---
+
+## Where everything is
+
+| You want… | Go to |
+|---|---|
+| **Order the PCB** (JLCPCB) | [`hardware/pcb/`](hardware/pcb/) — see [Order the board](#order-the-board-jlcpcb) |
+| **Flash the firmware** | [`firmware/`](firmware/) — see [Flash it](#flash-it-when-the-board-arrives) |
+| **3D‑print the enclosure** | [`hardware/pcb/enclosure_box.stl`](hardware/pcb/enclosure_box.stl) + [`enclosure_lid.stl`](hardware/pcb/enclosure_lid.stl) |
+| **Build it without a custom PCB** | [`hardware/module-build/BUILD_GUIDE.md`](hardware/module-build/BUILD_GUIDE.md) |
+| **Parts / shopping list** | [`orders/ORDER_THIS_WEEK.md`](orders/ORDER_THIS_WEEK.md), [`orders/lcsc-parts.md`](orders/lcsc-parts.md) |
+| **How the lamp's DMX works** | [`docs/dmx-profile.md`](docs/dmx-profile.md) |
+| **Why the circuit is built this way** | [`docs/rs485-design-notes.md`](docs/rs485-design-notes.md) |
+| **Schematic & wiring diagrams** | [`docs/schematic-diagram.svg`](docs/schematic-diagram.svg), [`docs/wiring-diagram.svg`](docs/wiring-diagram.svg) |
+| **Edit/regenerate the board** | [`hardware/pcb/`](hardware/pcb/) — KiCad `wakelight.kicad_pcb` + `generate_board.py` / `route_board.py` |
+
+---
+
+## Order the board (JLCPCB)
+
+The custom PCB is a 2‑layer board, 66 × 42 mm, with a board‑mount Neutrik NC5FAH
+female 5‑pin XLR on the edge. Everything JLCPCB needs is already exported in
+[`hardware/pcb/`](hardware/pcb/):
+
+| File | What it is | Upload to JLC as |
+|---|---|---|
+| [`hardware/pcb/wakelight_gerbers.zip`](hardware/pcb/wakelight_gerbers.zip) | The board (copper, mask, silk, drills) | **Gerbers** |
+| [`hardware/pcb/jlcpcb_bom.csv`](hardware/pcb/jlcpcb_bom.csv) | Bill of materials (LCSC part numbers) | **BOM** |
+| [`hardware/pcb/jlcpcb_cpl.csv`](hardware/pcb/jlcpcb_cpl.csv) | Part positions / rotations | **CPL (Pick‑and‑Place)** |
+
+**Steps**
+
+1. Go to [jlcpcb.com](https://jlcpcb.com) → **Add gerber file** → upload
+   [`wakelight_gerbers.zip`](hardware/pcb/wakelight_gerbers.zip).
+2. Turn on **PCB Assembly**. When prompted, upload
+   [`jlcpcb_bom.csv`](hardware/pcb/jlcpcb_bom.csv) (BOM) and
+   [`jlcpcb_cpl.csv`](hardware/pcb/jlcpcb_cpl.csv) (CPL / Pick‑and‑Place).
+3. Check the placement preview against
+   [`render_top.png`](hardware/pcb/render_top.png) /
+   [`render_bottom.png`](hardware/pcb/render_bottom.png), confirm parts, and order.
+
+**Good to know**
+
+- The **XLR connector (J2) is hand‑soldered** (through‑hole) — it is *not* in the
+  assembly BOM. Order it separately (see [`orders/`](orders/)).
+- The 120 Ω termination resistor (R11) is intentionally **not populated**; the
+  lamp terminates the bus.
+- An older screw‑terminal version of the board is archived in
+  [`hardware/pcb/v1.0-terminal/`](hardware/pcb/v1.0-terminal/).
+
+### Print the enclosure (optional)
+
+[`enclosure_box.stl`](hardware/pcb/enclosure_box.stl) and
+[`enclosure_lid.stl`](hardware/pcb/enclosure_lid.stl) (or the zip
+[`enclosure_stl.zip`](hardware/pcb/enclosure_stl.zip)). Preview:
+[`enclosure_preview.png`](hardware/pcb/enclosure_preview.png). Source:
+[`enclosure.scad`](hardware/pcb/enclosure.scad).
+
+---
+
+## Flash it when the board arrives
+
+The firmware is a [PlatformIO](https://platformio.org) project in
+[`firmware/`](firmware/). Plug the board into your computer over USB‑C, then pick
+one of these.
+
+### Easiest — let Claude Code do it
+
+Open a terminal **inside the `firmware/` folder** and run:
 
 ```
-[USB 5V] → [ESP32] → [3.3V RS-485 driver] → [female 5-pin XLR] → PL60C DMX-IN
-              ↑ Wi-Fi: http://wakelight.local
+claude
 ```
 
-The custom PCB (v1.1, 66 × 42 mm) carries a PCB-mount Neutrik NC5FAH female
-XLR on its edge, so any standard male→female 5-pin DMX lead connects the box
-to the lamp directly. The earlier screw-terminal variant is archived in
-`hardware/pcb/v1.0-terminal/`.
+Then tell it:
 
-## Schematic
+> *"Flash this firmware to my ESP32 over USB and help me bring it up."*
 
-![WakeLight full schematic — USB-C power, AMS1117 LDO, CH340C auto-program, ESP32, THVD1410 DMX out](docs/schematic-diagram.svg)
+It will build, upload, and walk you through Wi‑Fi and lamp setup. (This board was
+literally brought up this way.)
 
-The whole board: USB-C 5 V → AMS1117 3.3 V LDO, a CH340C USB-UART with the
-classic SS8050 DTR/RTS auto-program circuit (one-click flashing — no buttons),
-the ESP32-WROOM-32E, and the THVD1410 RS-485 output stage. EN/boot have the
-usual pull-up, cap and tact switches; every supply pin is locally decoupled.
-Matching net-name tags denote the same electrical net.
+### Manual — PlatformIO
 
-### DMX output stage (detail)
+If you'd rather drive it yourself, install
+[PlatformIO](https://platformio.org/install) (the CLI, or the VS Code extension),
+then from the `firmware/` folder:
 
-![WakeLight DMX output stage — ESP32 → THVD1410 RS-485 driver → female 5-pin XLR](docs/wiring-diagram.svg)
+```
+pio run -t upload        # build the production firmware and flash it
+pio device monitor       # optional: watch the serial log @ 115200 baud
+```
 
-The output stage is **transmit-only**: the THVD1410's receiver output (RO) is
-left unconnected, and DE + /RE are tied to GPIO21 — which the firmware holds
-HIGH so the driver is always enabled. A 680 Ω fail-safe bias pair (A→3V3,
-B→GND) keeps the idle bus in a defined state; the 120 Ω termination footprint
-is left unpopulated (DNP) because the PL60C terminates the far end. Everything
-runs from the on-board AMS1117 3.3 V rail (USB-C 5 V in). Full rationale in
-`docs/rs485-design-notes.md`.
+There's also a no‑Wi‑Fi self‑check that proves the DMX output works on the bench:
 
-## What's here
+```
+pio run -e selfcheck -t upload     # then watch serial; re-flash the default to restore production
+```
 
-| Path | What |
-|---|---|
-| `orders/ORDER_THIS_WEEK.md` | **Start here** — click-to-order shopping lists (modules now, PCB fab) |
-| `hardware/module-build/BUILD_GUIDE.md` | Devkit + breakout wiring, 20-min assembly |
-| `hardware/pcb/` | Custom PCB: KiCad board (DRC-clean), `wakelight_gerbers.zip`, JLCPCB BOM + CPL, renders |
-| `firmware/` | PlatformIO project — compiles clean, same pinout for both builds |
-| `docs/dmx-profile.md` | PL60C official DMX channel map + lamp setup steps |
-| `docs/rs485-design-notes.md` | Why the output stage is built the way it is |
+### Set up the lamp
 
-## How it works
+On the PL60C: **DMX mode ON, address 001** (long‑press MENU → DMX → ON, then
+ADDR → 001). Plug the board's XLR into the panel's **DMX‑IN**.
 
-- **DMX**: continuous 40 Hz refresh of a 513-slot universe from a dedicated
-  FreeRTOS task (esp_dmx, hardware UART — Wi-Fi can't jitter it). The PL60C's
-  native profile is driven in CCT mode: mode-select channel, brightness,
-  colour temperature (2500–10000 K), G/M tint.
-- **Sunrise**: two-phase dawn — a slow cubic glow from black at 2500 K up to
-  10%, then brightness + CCT sweep to your configured daylight, hitting 100%
-  exactly at alarm time. Stays on for a configurable hold, then off.
-- **Portal**: per-day alarms, ramp length, sunrise colour shaping, manual
-  brightness/CCT/HSI control, 2-minute demo button, fixture settings.
-  mDNS at `http://wakelight.local`.
-- **Time**: NTP with proper Europe/London DST rules. No RTC needed.
-- **Provisioning**: first boot opens Wi-Fi AP `WakeLight-Setup`
-  (password `sunrise123`) with a captive portal for your home Wi-Fi.
+### First boot / Wi‑Fi
 
-## Quick start (once parts arrive)
+The board opens a hotspot **`WakeLight-Setup`** (password `sunrise123`). Join it,
+enter your home Wi‑Fi, then open **http://wakelight.local** to set per‑day alarms,
+run the 2‑minute sunrise demo, and control brightness / colour temperature.
 
-1. `cd firmware && pio run -t upload` with the ESP32 on USB
-2. Wire per the build guide; plug XLR into the lamp's **DMX-IN**
-3. On the lamp: long-press MODE/MENU → DMX → ON, DMX ADDR → 001
-4. Join `WakeLight-Setup`, give it your Wi-Fi, open `http://wakelight.local`
-5. Tap **2-min sunrise demo** — the panel should dawn from nothing
-6. Set your alarms. Done.
+---
 
-## Pinout (both builds)
+## How it works (short version)
 
-| ESP32 | Function |
-|---|---|
-| GPIO17 | DMX TX → transceiver DI |
-| GPIO21 | transceiver DE + /RE (driver always enabled) |
-| GPIO2 | status LED (blinks during sunrise) |
-| 5-pin XLR | 1 = GND, 2 = Data−, 3 = Data+, 4/5 unused |
+- **Output stage:** ESP32 (GPIO17 TX) → THVD1410 RS‑485 driver → female 5‑pin XLR.
+  It's transmit‑only, so the driver enable (GPIO21) is simply held HIGH in
+  firmware. Diagrams in [`docs/`](docs/).
+- **Sunrise:** a two‑phase dawn ramp that reaches 100 % at your alarm time, then
+  holds for a configurable time and switches off.
+- **Details:** [`docs/rs485-design-notes.md`](docs/rs485-design-notes.md) (circuit)
+  and [`docs/dmx-profile.md`](docs/dmx-profile.md) (the PL60C's DMX channels).
