@@ -28,7 +28,7 @@ effects. Includes wiring schematics and helper scripts.
 The refined product. A purpose-built **custom PCB** (Neutrik 5-pin XLR,
 USB-C power, CH340C one-click flashing, THVD1410 RS-485 output stage) plus
 firmware and a Wi-Fi setup portal. Ships hardware deliverables — KiCad
-project, schematics, enclosure STLs and order files.
+project, gerbers, schematics and JLCPCB order files (BOM + pick-and-place).
 
 | Custom PCB — XLR variant (top) | Bottom |
 |:---:|:---:|

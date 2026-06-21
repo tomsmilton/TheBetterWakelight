@@ -25,9 +25,7 @@ configure from a phone-friendly web page on your home Wi‑Fi.
 |---|---|
 | **Order the PCB** (JLCPCB) | [`hardware/pcb/`](hardware/pcb/) — see [Order the board](#order-the-board-jlcpcb) |
 | **Flash the firmware** | [`firmware/`](firmware/) — see [Flash it](#flash-it-when-the-board-arrives) |
-| **3D‑print the enclosure** | [`hardware/pcb/enclosure_box.stl`](hardware/pcb/enclosure_box.stl) + [`enclosure_lid.stl`](hardware/pcb/enclosure_lid.stl) |
-| **Build it without a custom PCB** | [`hardware/module-build/BUILD_GUIDE.md`](hardware/module-build/BUILD_GUIDE.md) |
-| **Parts / shopping list** | [`orders/ORDER_THIS_WEEK.md`](orders/ORDER_THIS_WEEK.md), [`orders/lcsc-parts.md`](orders/lcsc-parts.md) |
+| **Parts list** (LCSC numbers) | [`orders/lcsc-parts.md`](orders/lcsc-parts.md) |
 | **How the lamp's DMX works** | [`docs/dmx-profile.md`](docs/dmx-profile.md) |
 | **Why the circuit is built this way** | [`docs/rs485-design-notes.md`](docs/rs485-design-notes.md) |
 | **Schematic & wiring diagrams** | [`docs/schematic-diagram.svg`](docs/schematic-diagram.svg), [`docs/wiring-diagram.svg`](docs/wiring-diagram.svg) |
@@ -61,19 +59,10 @@ female 5‑pin XLR on the edge. Everything JLCPCB needs is already exported in
 **Good to know**
 
 - The **XLR connector (J2) is hand‑soldered** (through‑hole) — it is *not* in the
-  assembly BOM. Order it separately (see [`orders/`](orders/)).
+  assembly BOM. Order it separately (the part is listed in
+  [`orders/lcsc-parts.md`](orders/lcsc-parts.md)).
 - The 120 Ω termination resistor (R11) is intentionally **not populated**; the
   lamp terminates the bus.
-- An older screw‑terminal version of the board is archived in
-  [`hardware/pcb/v1.0-terminal/`](hardware/pcb/v1.0-terminal/).
-
-### Print the enclosure (optional)
-
-[`enclosure_box.stl`](hardware/pcb/enclosure_box.stl) and
-[`enclosure_lid.stl`](hardware/pcb/enclosure_lid.stl) (or the zip
-[`enclosure_stl.zip`](hardware/pcb/enclosure_stl.zip)). Preview:
-[`enclosure_preview.png`](hardware/pcb/enclosure_preview.png). Source:
-[`enclosure.scad`](hardware/pcb/enclosure.scad).
 
 ---
 
