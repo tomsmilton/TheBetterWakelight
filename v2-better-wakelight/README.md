@@ -11,7 +11,11 @@ configure from a phone-friendly web page on your home Wi‑Fi.
 > July 2026**. If you want the tidy version, check back then. What's here is
 > enough to build the board and make the lamp do a sunrise today.
 
-![WakeLight v1.1 board (top)](hardware/pcb/render_top.png)
+**The custom PCB — XLR variant (v1.1), board-mount Neutrik 5-pin XLR:**
+
+| Top | Bottom |
+|:---:|:---:|
+| ![Custom PCB v1.1 — top](hardware/pcb/render_top.png) | ![Custom PCB v1.1 — bottom](hardware/pcb/render_bottom.png) |
 
 ---
 

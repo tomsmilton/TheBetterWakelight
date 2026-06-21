@@ -30,6 +30,10 @@ USB-C power, CH340C one-click flashing, THVD1410 RS-485 output stage) plus
 firmware and a Wi-Fi setup portal. Ships hardware deliverables — KiCad
 project, schematics, enclosure STLs and order files.
 
+| Custom PCB — XLR variant (top) | Bottom |
+|:---:|:---:|
+| ![v2 custom PCB — top](v2-better-wakelight/hardware/pcb/render_top.png) | ![v2 custom PCB — bottom](v2-better-wakelight/hardware/pcb/render_bottom.png) |
+
 → [Read the v2 README](v2-better-wakelight/README.md) ·
 [original project brief](v2-better-wakelight/BRIEF.md)
 
