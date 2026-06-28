@@ -19,10 +19,23 @@ static const char PORTAL_HTML[] PROGMEM = R"HTML(<!doctype html>
     font:16px/1.5 -apple-system,system-ui,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
   .phone{max-width:420px;margin:0 auto;min-height:100vh;
     padding:max(env(safe-area-inset-top),20px) 16px 104px;position:relative}
-  .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .head{display:flex;justify-content:space-between;align-items:center;
+    position:sticky;top:0;z-index:6;margin:0 -16px 12px;padding:10px 16px;
+    background:rgba(245,240,232,.9);backdrop-filter:saturate(1.3) blur(8px);-webkit-backdrop-filter:saturate(1.3) blur(8px)}
   h1{font:600 23px/1 ui-serif,"Iowan Old Style",Georgia,serif;margin:0}
   h1 .m{color:var(--accent);font-style:italic;font-weight:500}
+  .head .hr{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
   .lamp{font-size:13px;color:var(--muted)}
+  .sync{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;
+    padding:4px 10px;border-radius:999px;border:1px solid var(--line2);background:var(--panel);color:var(--muted);transition:.2s}
+  .sync .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:0 0 8px}
+  .sync.saved{color:var(--good);border-color:#cbe0b0;background:#f1f6e9}
+  .sync.saved .dot{background:var(--good)}
+  .sync.saving{color:#9a6a1a;border-color:#f0d9a8;background:#fbf1dd}
+  .sync.saving .dot{background:#cc9a2a;animation:syncpulse 1s infinite}
+  .sync.error{color:#b64a3a;border-color:#e6c4bc;background:#fbe9e5;cursor:pointer}
+  .sync.error .dot{background:#b64a3a}
+  @keyframes syncpulse{0%,100%{opacity:1}50%{opacity:.3}}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;
     box-shadow:var(--shadow);margin-bottom:14px}
   .h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;margin:0}
@@ -145,7 +158,9 @@ static const char PORTAL_HTML[] PROGMEM = R"HTML(<!doctype html>
 </head>
 <body>
 <div class="phone">
-  <div class="head"><h1>Wake<span class="m">light</span></h1><span class="lamp" id="lampName">…</span></div>
+  <div class="head"><h1>Wake<span class="m">light</span></h1>
+    <div class="hr"><span class="lamp" id="lampName">…</span>
+      <div class="sync saved" id="sync" title="settings sync status"><span class="dot"></span><span id="syncText">Saved</span></div></div></div>
 
   <section class="panel on" data-p="home">
     <div class="card state">
@@ -290,10 +305,20 @@ const J={'Content-Type':'application/json'};
 const api=(p,o)=>fetch(p,o).then(r=>r.ok?r.json().catch(()=>({})):Promise.reject(r));
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('on'),1400);}
 
-let sched=null, busy=false;
+// settings-sync indicator: shows whether changes have reached the lamp
+function setSync(s){const el=$('#sync');if(!el)return;el.className='sync '+s;
+  $('#syncText').textContent=s==='saving'?'Saving…':s==='error'?'Not saved':'Saved';}
+$('#sync').addEventListener('click',()=>{if($('#sync').classList.contains('error'))saveSched();});
+// PUT a settings object, reflecting progress in the sync chip
+function putJSON(url,body){setSync('saving');
+  return api(url,{method:'PUT',headers:J,body:JSON.stringify(body)})
+    .then(j=>{setSync('saved');return j;}).catch(e=>{setSync('error');throw e;});}
+
+let sched=null;
 let saveT=null;
-function saveSched(){clearTimeout(saveT);saveT=setTimeout(()=>{
-  api('/api/schedule',{method:'PUT',headers:J,body:JSON.stringify(sched)}).then(j=>{sched=j;}).catch(()=>toast('save failed'));
+function saveSched(){clearTimeout(saveT);setSync('saving');saveT=setTimeout(()=>{
+  api('/api/schedule',{method:'PUT',headers:J,body:JSON.stringify(sched)})
+    .then(j=>{sched=j;setSync('saved');}).catch(()=>setSync('error'));
 },350);}
 
 // ---------- tabs ----------
@@ -531,9 +556,9 @@ $$('#cctpresets button').forEach(b=>b.onclick=()=>setK(+b.dataset.k));
 
 // ---------- settings ----------
 $('#setName').addEventListener('click',()=>{const v=prompt('Lamp name',$('#nameV').textContent);
-  if(v&&v.trim())api('/api/device',{method:'PUT',headers:J,body:JSON.stringify({name:v.trim()})}).then(j=>{$('#nameV').textContent=j.name;$('#lampName').textContent=j.name+' ▾';});});
+  if(v&&v.trim())putJSON('/api/device',{name:v.trim()}).then(j=>{$('#nameV').textContent=j.name;$('#lampName').textContent=j.name+' ▾';}).catch(()=>{});});
 $('#setAddr').addEventListener('click',()=>{const v=prompt('DMX address (1-512)',$('#addrV').textContent);
-  const n=parseInt(v,10);if(n>=1&&n<=512)api('/api/fixture',{method:'PUT',headers:J,body:JSON.stringify({addr:n})}).then(j=>$('#addrV').textContent=j.addr);});
+  const n=parseInt(v,10);if(n>=1&&n<=512)putJSON('/api/fixture',{addr:n}).then(j=>$('#addrV').textContent=j.addr).catch(()=>{});});
 $('#setWifi').addEventListener('click',()=>{if(confirm('Forget Wi-Fi and reboot into setup mode?'))api('/api/wifireset',{method:'POST'});});
 
 // ---------- load + status poll ----------
@@ -585,7 +610,7 @@ Promise.all([
   api('/api/schedule').then(applySched).catch(()=>{}),
   api('/api/device').then(j=>{$('#lampName').textContent=(j.name||'WakeLight')+' ▾';$('#nameV').textContent=j.name;$('#hostV').textContent=j.hostname+'.local';}).catch(()=>{}),
   api('/api/fixture').then(j=>{$('#addrV').textContent=j.addr;$('#rangeV').textContent=`${j.kmin}–${j.kmax}K`;}).catch(()=>{}),
-]).then(()=>{updManual();poll();setInterval(poll,3000);});
+]).then(()=>{updManual();setSync('saved');poll();setInterval(poll,3000);});
 </script>
 </body>
 </html>
