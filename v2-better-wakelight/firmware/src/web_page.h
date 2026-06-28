@@ -563,8 +563,9 @@ function showPeers(){
     const peers=j.peers||[];
     let h='<div class="ph">On your network</div>';
     peers.forEach(p=>{
+      const host=p.host||p.slug;
       if(p.self) h+=`<div class="pi self"><span>${p.name} <span class="u">· this one</span></span></div>`;
-      else h+=`<div class="pi" data-url="http://${p.slug}.local"><span>${p.name}<br><span class="u">${p.slug}.local</span></span><span class="ar">→</span></div>`;
+      else h+=`<div class="pi" data-url="http://${host}.local"><span>${p.name}<br><span class="u">${host}.local</span></span><span class="ar">→</span></div>`;
     });
     if(peers.filter(p=>!p.self).length===0) h+='<div class="pi self"><span class="u">No other lamps found</span></div>';
     m.innerHTML=h;

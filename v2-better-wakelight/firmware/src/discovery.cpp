@@ -66,8 +66,10 @@ static void tryClaimWakelight() {
 }
 
 static void updateTxt() {
-  mdns_txt_item_t items[] = { {"name", (char*)cfg.name}, {"slug", g_slug} };
-  mdns_service_txt_set("_wakelight", "_tcp", items, 2);
+  // "host" is the unique resolvable name and is what peers dedup/skip-self on
+  // (two lamps can share a friendly name + slug, but never a host).
+  mdns_txt_item_t items[] = { {"name", (char*)cfg.name}, {"slug", g_slug}, {"host", g_chosen} };
+  mdns_service_txt_set("_wakelight", "_tcp", items, 3);
 }
 
 void Discovery::applyIdentity() {
@@ -108,17 +110,29 @@ static const char* txtLookup(const mdns_result_t* r, const char* key) {
 void Discovery::buildPeers(JsonDocument& doc) {
   JsonArray arr = doc["peers"].to<JsonArray>();
   JsonObject me = arr.add<JsonObject>();
-  me["name"] = cfg.name; me["slug"] = g_slug; me["self"] = true;
+  me["name"] = cfg.name; me["host"] = g_chosen; me["slug"] = g_slug; me["self"] = true;
 
+  String seen = String("|") + g_chosen + "|";   // skip-self + dedup by unique host
+  // A cold one-shot PTR query often misses peers that the OS browser (which
+  // listens continuously) sees, so use a longer window and retry once if empty.
   mdns_result_t* results = nullptr;
-  if (mdns_query_ptr("_wakelight", "_tcp", 1000, 8, &results) == ESP_OK) {
+  mdns_query_ptr("_wakelight", "_tcp", 2500, 16, &results);
+  if (!results) mdns_query_ptr("_wakelight", "_tcp", 2500, 16, &results);
+  if (results) {
     for (mdns_result_t* r = results; r; r = r->next) {
+      const char* host = txtLookup(r, "host");
       const char* slug = txtLookup(r, "slug");
-      if (!slug || !slug[0] || strcmp(slug, g_slug) == 0) continue;  // skip self / unnamed
       const char* name = txtLookup(r, "name");
+      const char* id = (host && host[0]) ? host : slug;   // host preferred; slug for old peers
+      if (!id || !id[0]) continue;
+      String key = String("|") + id + "|";
+      if (seen.indexOf(key) >= 0) continue;               // self or duplicate
+      seen += id; seen += "|";
       JsonObject p = arr.add<JsonObject>();
-      p["name"] = (name && name[0]) ? name : slug;
-      p["slug"] = slug; p["self"] = false;
+      p["name"] = (name && name[0]) ? name : id;
+      p["host"] = (host && host[0]) ? host : (slug ? slug : id);
+      p["slug"] = slug ? slug : id;
+      p["self"] = false;
     }
     mdns_query_results_free(results);
   }
