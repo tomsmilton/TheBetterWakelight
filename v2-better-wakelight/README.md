@@ -4,12 +4,18 @@ A small ESP32 board that plugs into a **Neewer PL60C** LED panel's 5-pin DMX‑I
 and ramps it from black to full daylight before your alarm — a sunrise lamp you
 configure from a phone-friendly web page on your home Wi‑Fi.
 
-> [!WARNING]
-> **This firmware is rough bring‑up firmware, not a polished release.**
-> It works — the DMX output stage is fixed and bench‑tested — but it has not
-> been refined or cleaned up. A nicer, **prettier firmware is likely coming in
-> July 2026**. If you want the tidy version, check back then. What's here is
-> enough to build the board and make the lamp do a sunrise today.
+> [!NOTE]
+> **Firmware UI rebuild (June 2026).** The portal is now a clean phone‑first app:
+> a Home with the wake time, on/off and a live "turn on now"; a Schedule tab with
+> a maths‑driven sunrise curve (sigmoid / linear / ease / exponential, skewable)
+> and a start→end colour‑temperature ramp; a Manual tab with full CCT/HSI control
+> and the lamp's built‑in effects; and Settings. The DMX output stage is the same
+> bench‑tested design. See [`design/`](design/) for the UI mockup the firmware was
+> built from.
+>
+> One caveat: the **built‑in effects are not yet verified on hardware** — the FX
+> DMX mode‑select byte (see `firmware/src/dmx_engine.cpp`) may need tuning. The
+> sunrise and manual CCT/HSI paths follow the documented channel table.
 
 **The custom PCB — XLR variant (v1.1), board-mount Neutrik 5-pin XLR:**
 
@@ -112,8 +118,8 @@ ADDR → 001). Plug the board's XLR into the panel's **DMX‑IN**.
 ### First boot / Wi‑Fi
 
 The board opens a hotspot **`WakeLight-Setup`** (password `sunrise123`). Join it,
-enter your home Wi‑Fi, then open **http://wakelight.local** to set per‑day alarms,
-run the 2‑minute sunrise demo, and control brightness / colour temperature.
+enter your home Wi‑Fi, then open **http://wakelight.local** to set your wake time,
+shape the sunrise, choose its colours, and control the light by hand.
 
 ---
 
@@ -122,7 +128,9 @@ run the 2‑minute sunrise demo, and control brightness / colour temperature.
 - **Output stage:** ESP32 (GPIO17 TX) → THVD1410 RS‑485 driver → female 5‑pin XLR.
   It's transmit‑only, so the driver enable (GPIO21) is simply held HIGH in
   firmware. Diagrams in [`docs/`](docs/).
-- **Sunrise:** a two‑phase dawn ramp that reaches 100 % at your alarm time, then
-  holds for a configurable time and switches off.
+- **Sunrise:** brightness follows a chosen maths curve over the sunrise window,
+  reaching your final level at the wake time while the colour sweeps from a warm
+  start to a cool finish; it then holds for a configurable time and switches off.
+  Up to two alarms (each with its own days), plus a manual override and effects.
 - **Details:** [`docs/rs485-design-notes.md`](docs/rs485-design-notes.md) (circuit)
   and [`docs/dmx-profile.md`](docs/dmx-profile.md) (the PL60C's DMX channels).

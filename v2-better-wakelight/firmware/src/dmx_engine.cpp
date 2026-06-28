@@ -19,6 +19,10 @@ static uint8_t clamp255(float v) {
 // PL60C mode-select values (official channel table: n value picks the mode).
 static const uint8_t PL60C_MODE_CCT = 16;   // 0-31  -> CCT mode
 static const uint8_t PL60C_MODE_HSI = 48;   // 32-63 -> HSI mode
+// FX mode lives at 64-95 per docs/dmx-profile.md (the researched channel table).
+// NOTE: the older V1 firmware used 60 for FX. If the built-in effects don't
+// trigger on the lamp, this is the one byte to try changing (60 vs 80).
+static const uint8_t PL60C_MODE_FX  = 80;   // 64-95 -> FX mode
 
 // Map the abstract Look onto DMX slots according to the configured profile.
 static void renderLook(const Look& l) {
@@ -33,17 +37,20 @@ static void renderLook(const Look& l) {
   float span = (float)(cfg.cctMaxK - cfg.cctMinK);
   float cctNorm = span > 0 ? ((l.cctK - cfg.cctMinK) / span) : 0;
   uint8_t cct = clamp255(cctNorm * 255.0f);
+  uint8_t gm  = clamp255((l.gm + 50.0f) / 100.0f * 255.0f);   // -50..+50 -> 0..255
   uint8_t hue = clamp255(l.hue / 360.0f * 255.0f);
   uint8_t sat = clamp255(l.sat * 255.0f);
 
   switch (cfg.fixtureMode) {
     case MODE_PL60C:
       // n: mode select, n+1: brightness, then per-mode sub-map.
-      if (l.useHsi) {
+      if (l.useFx) {
+        set(0, PL60C_MODE_FX); set(1, dim); set(2, l.fxEffect);
+        for (uint8_t i = 0; i < 6; i++) set(3 + i, l.fxParams[i]);
+      } else if (l.useHsi) {
         set(0, PL60C_MODE_HSI); set(1, dim); set(2, hue); set(3, sat);
       } else {
-        set(0, PL60C_MODE_CCT); set(1, dim); set(2, cct);
-        set(3, 128);                          // G/M tint: 128 = neutral
+        set(0, PL60C_MODE_CCT); set(1, dim); set(2, cct); set(3, gm);
       }
       break;
     case MODE_GENERIC_CCT:

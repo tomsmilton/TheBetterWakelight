@@ -19,11 +19,15 @@ constexpr int DMX_RX_PIN = -1;   // RO left unconnected (transmit-only)
 constexpr int DMX_EN_PIN = 21;   // -> transceiver DE & /RE (high = drive bus)
 
 struct Look {
-  float intensity = 0.0f;   // 0..1 (0 = off)
-  float cctK      = 2900;   // colour temperature in Kelvin
-  float hue       = 30;     // degrees, only used in HSI mode
-  float sat       = 1.0f;   // 0..1, only used in HSI mode
-  bool  useHsi    = false;  // drive hue/sat channels instead of CCT
+  float   intensity = 0.0f;   // 0..1 (0 = off)
+  float   cctK      = 2900;   // colour temperature in Kelvin (CCT mode)
+  float   gm        = 0.0f;   // green/magenta tint -50..+50 (CCT mode)
+  float   hue       = 30;     // degrees, HSI mode
+  float   sat       = 1.0f;   // 0..1, HSI mode
+  bool    useHsi    = false;  // drive hue/sat channels instead of CCT
+  bool    useFx     = false;  // drive a built-in effect instead of CCT/HSI
+  uint8_t fxEffect  = 0;      // n+2 effect-select byte
+  uint8_t fxParams[6] = {0};  // n+3..n+8 effect parameters
 };
 
 namespace DmxEngine {
