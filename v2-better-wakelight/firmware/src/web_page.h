@@ -25,7 +25,18 @@ static const char PORTAL_HTML[] PROGMEM = R"HTML(<!doctype html>
   h1{font:600 23px/1 ui-serif,"Iowan Old Style",Georgia,serif;margin:0}
   h1 .m{color:var(--accent);font-style:italic;font-weight:500}
   .head .hr{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
-  .lamp{font-size:13px;color:var(--muted)}
+  .lamp{font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
+  .peersmenu{position:fixed;top:62px;right:16px;z-index:8;background:var(--panel);border:1px solid var(--line2);
+    border-radius:14px;box-shadow:0 10px 30px rgba(58,43,24,.22);padding:6px;min-width:200px;max-width:280px;display:none}
+  .peersmenu.show{display:block}
+  .peersmenu .ph{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;padding:8px 10px 5px}
+  .peersmenu .pi{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;
+    color:var(--text);font-size:14px;font-weight:600;cursor:pointer}
+  .peersmenu .pi:hover{background:var(--panel2)}
+  .peersmenu .pi.self{color:var(--muted);cursor:default;font-weight:500}
+  .peersmenu .pi.self:hover{background:transparent}
+  .peersmenu .pi .u{font-size:11px;color:var(--muted);font-weight:500}
+  .peersmenu .pi .ar{color:var(--accent);font-weight:700}
   .sync{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;
     padding:4px 10px;border-radius:999px;border:1px solid var(--line2);background:var(--panel);color:var(--muted);transition:.2s}
   .sync .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:0 0 8px}
@@ -161,6 +172,7 @@ static const char PORTAL_HTML[] PROGMEM = R"HTML(<!doctype html>
   <div class="head"><h1>Wake<span class="m">light</span></h1>
     <div class="hr"><span class="lamp" id="lampName">…</span>
       <div class="sync saved" id="sync" title="settings sync status"><span class="dot"></span><span id="syncText">Saved</span></div></div></div>
+  <div class="peersmenu" id="peers"></div>
 
   <section class="panel on" data-p="home">
     <div class="card state">
@@ -561,6 +573,27 @@ $('#setAddr').addEventListener('click',()=>{const v=prompt('DMX address (1-512)'
   const n=parseInt(v,10);if(n>=1&&n<=512)putJSON('/api/fixture',{addr:n}).then(j=>$('#addrV').textContent=j.addr).catch(()=>{});});
 $('#setWifi').addEventListener('click',()=>{if(confirm('Forget Wi-Fi and reboot into setup mode?'))api('/api/wifireset',{method:'POST'});});
 
+// ---------- peers: list all wakelights on the network ----------
+function showPeers(){
+  const m=$('#peers');
+  if(m.classList.contains('show')){m.classList.remove('show');return;}
+  m.innerHTML='<div class="ph">On your network</div><div class="pi self"><span class="u">Scanning…</span></div>';
+  m.classList.add('show');
+  api('/api/peers').then(j=>{
+    const peers=j.peers||[];
+    let h='<div class="ph">On your network</div>';
+    peers.forEach(p=>{
+      if(p.self) h+=`<div class="pi self"><span>${p.name} <span class="u">· this one</span></span></div>`;
+      else h+=`<div class="pi" data-url="http://${p.slug}.local"><span>${p.name}<br><span class="u">${p.slug}.local</span></span><span class="ar">→</span></div>`;
+    });
+    if(peers.filter(p=>!p.self).length===0) h+='<div class="pi self"><span class="u">No other lamps found</span></div>';
+    m.innerHTML=h;
+    m.querySelectorAll('[data-url]').forEach(el=>el.onclick=()=>{location.href=el.dataset.url;});
+  }).catch(()=>{m.innerHTML='<div class="ph">WakeLights</div><div class="pi self"><span class="u">Couldn’t scan</span></div>';});
+}
+$('#lampName').addEventListener('click',e=>{e.stopPropagation();showPeers();});
+document.addEventListener('click',e=>{if(!e.target.closest('#peers')&&!e.target.closest('#lampName'))$('#peers').classList.remove('show');});
+
 // ---------- load + status poll ----------
 function setWindow(){ if(!sched)return; wakeMin=sched.alarms[0].wake; winStartMin=wakeMin-sched.sunriseMin; render(); }
 function refreshSub(){ setWindow(); }
@@ -608,7 +641,8 @@ function poll(){
 render(); paintCct();   // draw defaults immediately; data load refines them
 Promise.all([
   api('/api/schedule').then(applySched).catch(()=>{}),
-  api('/api/device').then(j=>{$('#lampName').textContent=(j.name||'WakeLight')+' ▾';$('#nameV').textContent=j.name;$('#hostV').textContent=j.hostname+'.local';}).catch(()=>{}),
+  api('/api/device').then(j=>{$('#lampName').textContent=(j.name||'WakeLight')+' ▾';$('#nameV').textContent=j.name;
+    $('#hostV').textContent=j.host+'.local'+(j.holds?' · wakelight.local':'');}).catch(()=>{}),
   api('/api/fixture').then(j=>{$('#addrV').textContent=j.addr;$('#rangeV').textContent=`${j.kmin}–${j.kmax}K`;}).catch(()=>{}),
 ]).then(()=>{updManual();setSync('saved');poll();setInterval(poll,3000);});
 </script>

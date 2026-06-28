@@ -11,7 +11,9 @@ configure from a phone-friendly web page on your home Wi‑Fi.
 > and a start→end colour‑temperature ramp; a Manual tab with full CCT/HSI control
 > and the lamp's built‑in effects; and Settings. The DMX output stage is the same
 > bench‑tested design. See [`design/`](design/) for the UI mockup the firmware was
-> built from.
+> built from. Several lamps coexist on one network (each at its own `name.local`,
+> listed inside the app), and a header chip shows whether your edits have actually
+> saved to the lamp.
 >
 > One caveat: the **built‑in effects are not yet verified on hardware** — the FX
 > DMX mode‑select byte (see `firmware/src/dmx_engine.cpp`) may need tuning. The
@@ -22,6 +24,26 @@ configure from a phone-friendly web page on your home Wi‑Fi.
 | Top | Bottom |
 |:---:|:---:|
 | ![Custom PCB v1.1 — top](hardware/pcb/render_top.png) | ![Custom PCB v1.1 — bottom](hardware/pcb/render_bottom.png) |
+
+---
+
+## The app
+
+Open **http://wakelight.local** on your phone (or any browser on the same Wi‑Fi).
+The header chip shows whether changes have reached the lamp (**Saving… → Saved**),
+and tapping the lamp name lists every WakeLight on your network.
+
+| Home | Schedule | Manual |
+|:---:|:---:|:---:|
+| ![Home tab](docs/screenshots/home.png) | ![Schedule tab](docs/screenshots/schedule.png) | ![Manual tab](docs/screenshots/manual.png) |
+| Wake time, alarm on/off, "turn on now" | Sunrise curve (shape + skew) & start→end colour ramp | Full CCT / HSI control + built‑in effects |
+
+**One network, many lamps** — each board is reachable at its own `name.local`,
+and any lamp lists the others. It works the same in a desktop browser:
+
+| Lamps on your network | In a desktop browser |
+|:---:|:---:|
+| ![Network lamp list](docs/screenshots/peers.png) | ![Desktop browser](docs/screenshots/web.png) |
 
 ---
 
@@ -132,5 +154,8 @@ shape the sunrise, choose its colours, and control the light by hand.
   reaching your final level at the wake time while the colour sweeps from a warm
   start to a cool finish; it then holds for a configurable time and switches off.
   Up to two alarms (each with its own days), plus a manual override and effects.
+- **Many lamps:** each board publishes a unique `name.local` over mDNS (the first
+  one also answers `wakelight.local`), so the app can discover and list every
+  WakeLight on the network and jump between them.
 - **Details:** [`docs/rs485-design-notes.md`](docs/rs485-design-notes.md) (circuit)
   and [`docs/dmx-profile.md`](docs/dmx-profile.md) (the PL60C's DMX channels).

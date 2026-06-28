@@ -2,9 +2,9 @@
 #include "config.h"
 #include "dmx_engine.h"
 #include "scheduler.h"
+#include "discovery.h"
 #include "web_page.h"
 #include <WebServer.h>
-#include <ESPmDNS.h>
 #include <ArduinoJson.h>
 #include <WiFi.h>
 #include <time.h>
@@ -155,8 +155,10 @@ static void handleDismiss() { Scheduler::dismissToday(); ok(); }
 
 static void handleGetDevice() {
   JsonDocument doc;
-  doc["name"]     = cfg.name;
-  doc["hostname"] = cfg.hostname;
+  doc["name"]  = cfg.name;
+  doc["host"]  = Discovery::chosenHost();        // the .local that actually resolves
+  doc["slug"]  = Discovery::slug();
+  doc["holds"] = Discovery::holdsWakelight();    // also answers wakelight.local
   sendJson(doc);
 }
 static void handlePutDevice() {
@@ -165,8 +167,15 @@ static void handlePutDevice() {
   if (doc["name"].is<const char*>()) {
     strlcpy(cfg.name, doc["name"].as<const char*>(), sizeof(cfg.name));
     cfg.save();
+    Discovery::applyIdentity();                  // republish hostname/instance/TXT
   }
   handleGetDevice();
+}
+
+static void handlePeers() {
+  JsonDocument doc;
+  Discovery::buildPeers(doc);
+  sendJson(doc);
 }
 
 static void handleGetFixture() {
@@ -206,12 +215,13 @@ void Portal::begin() {
   server.on("/api/dismiss",  HTTP_POST, handleDismiss);
   server.on("/api/device",   HTTP_GET,  handleGetDevice);
   server.on("/api/device",   HTTP_PUT,  handlePutDevice);
+  server.on("/api/peers",    HTTP_GET,  handlePeers);
   server.on("/api/fixture",  HTTP_GET,  handleGetFixture);
   server.on("/api/fixture",  HTTP_PUT,  handlePutFixture);
   server.on("/api/wifireset",HTTP_POST, handleWifiReset);
   server.onNotFound([]() { server.send(404, "text/plain", "not found"); });
   server.begin();
-  if (MDNS.begin(cfg.hostname)) MDNS.addService("http", "tcp", 80);
+  Discovery::begin();
 }
 
 void Portal::tick() { server.handleClient(); }
