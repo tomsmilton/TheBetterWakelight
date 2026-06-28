@@ -29,9 +29,10 @@ configure from a phone-friendly web page on your home Wi‑Fi.
 
 ## The app
 
-Open **http://wakelight.local** on your phone (or any browser on the same Wi‑Fi).
-The header chip shows whether changes have reached the lamp (**Saving… → Saved**),
-and tapping the lamp name lists every WakeLight on your network.
+Open **http://wakelight.local** in any browser on the same Wi‑Fi — phone or
+desktop. The header chip shows whether changes have reached the lamp
+(**Saving… → Saved**), and tapping the lamp name lists every WakeLight on your
+network.
 
 | Home | Schedule | Manual |
 |:---:|:---:|:---:|
@@ -39,11 +40,9 @@ and tapping the lamp name lists every WakeLight on your network.
 | Wake time, alarm on/off, "turn on now" | Sunrise curve (shape + skew) & start→end colour ramp | Full CCT / HSI control + built‑in effects |
 
 **One network, many lamps** — each board is reachable at its own `name.local`,
-and any lamp lists the others. It works the same in a desktop browser:
+and any lamp lists the others:
 
-| Lamps on your network | In a desktop browser |
-|:---:|:---:|
-| ![Network lamp list](docs/screenshots/peers.png) | ![Desktop browser](docs/screenshots/web.png) |
+<p align="center"><img src="docs/screenshots/peers.png" width="300" alt="Lamps on your network"></p>
 
 ---
 

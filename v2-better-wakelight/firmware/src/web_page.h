@@ -438,7 +438,7 @@ $('#endToday').addEventListener('click',()=>{api('/api/dismiss',{method:'POST'})
 // ---------- schedule detail sliders ----------
 $('#sunlen').addEventListener('input',()=>{$('#sunlenV').textContent=$('#sunlen').value+' min';sched.sunriseMin=+$('#sunlen').value;saveSched();refreshSub();});
 $('#finlevel').addEventListener('input',()=>{$('#finV').textContent=$('#finlevel').value+'%';sched.finalLevel=+$('#finlevel').value;saveSched();});
-$('#hold').addEventListener('input',()=>{$('#holdV').textContent=$('#hold').value+' min';sched.holdMinutes=+$('#hold').value;saveSched();});
+$('#hold').addEventListener('input',()=>{$('#holdV').textContent=$('#hold').value+' min';sched.hold=+$('#hold').value;saveSched();});
 
 // ---------- repeat day pills (Mon-first display -> tm_wday bits) ----------
 const DAYBITS=[1,2,3,4,5,6,0], DAYLBL=['M','T','W','T','F','S','S'];
@@ -611,7 +611,7 @@ function applySched(j){
   // detail sliders
   $('#sunlen').value=j.sunriseMin;$('#sunlenV').textContent=j.sunriseMin+' min';
   $('#finlevel').value=j.finalLevel;$('#finV').textContent=j.finalLevel+'%';
-  $('#hold').value=j.holdMinutes;$('#holdV').textContent=j.holdMinutes+' min';
+  $('#hold').value=j.hold;$('#holdV').textContent=j.hold+' min';
   $('#rangeV').textContent=`${j.kmin}–${j.kmax}K`;
   // curve
   fnId=j.curveFn;t0=j.t0/100;t1=j.t1/100;sc=j.skew/100;setWindow();
