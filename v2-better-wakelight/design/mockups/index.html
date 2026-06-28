@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wakelight — UI mockups</title>
+<style>
+  :root{
+    --bg:#f5f0e8;--grad:#ecdfcd;--panel:#fdfaf4;--panel2:#f2ead9;
+    --line:#e6dbc7;--line2:#d8ccb5;--text:#2b2620;--muted:#8a7d6b;
+    --accent:#cc5500;--shadow:0 1px 2px rgba(58,43,24,.06),0 8px 24px rgba(58,43,24,.09);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;color:var(--text);
+    background:radial-gradient(1400px 800px at 15% -10%,var(--grad),var(--bg) 55%) fixed;
+    font:16px/1.5 -apple-system,system-ui,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+  header{max-width:1180px;margin:0 auto;padding:36px 24px 8px}
+  h1{font:600 34px/1.1 ui-serif,"Iowan Old Style",Georgia,serif;letter-spacing:-.01em;margin:0 0 6px}
+  h1 .m{color:var(--accent);font-style:italic;font-weight:500}
+  .lede{color:var(--muted);max-width:680px;font-size:15.5px}
+  .lede b{color:var(--text)}
+  .grid{max-width:1180px;margin:0 auto;padding:20px 24px 70px;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:26px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden;
+    box-shadow:var(--shadow);display:flex;flex-direction:column}
+  .frame{background:linear-gradient(160deg,#efe3d2,#f7f2ea);padding:18px 18px 0;display:flex;justify-content:center}
+  .phone{width:248px;height:430px;border-radius:30px;border:8px solid #2b2620;background:#fff;
+    overflow:hidden;box-shadow:0 10px 26px rgba(43,38,32,.28);position:relative}
+  .phone iframe{width:340px;height:590px;border:0;transform:scale(.706);transform-origin:top left}
+  .cap{padding:16px 18px 18px}
+  .cap .n{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+    background:#fbe9d8;border:1px solid #f3d4b6;border-radius:99px;padding:2px 9px;margin-bottom:8px}
+  .cap h2{font-size:17px;margin:0 0 5px}
+  .cap p{font-size:13.5px;color:var(--muted);margin:0 0 14px;min-height:38px}
+  .cap .tags{font-size:11.5px;color:var(--muted);margin:0 0 14px}
+  .cap .tags span{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 7px;margin-right:5px}
+  .cap a{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;
+    text-decoration:none;font-size:13.5px;font-weight:600;border-radius:10px;padding:10px 16px;
+    box-shadow:0 2px 10px rgba(204,85,0,.2)}
+  .legend{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--muted);font-size:13.5px}
+  .legend code{background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Wake<span class="m">light</span> — UI direction mockups</h1>
+  <p class="lede">Ten directions for the rebuilt V2 firmware UI. The same scenario throughout —
+  wake <b>07:00, Mon–Fri, 30-minute sunrise</b>, lamp named <b>Bedroom</b> — so you can compare apples to apples.
+  Most controls are live (toggles, sliders, day pills, dials, tabs). Open each full-screen, click around, and
+  tell me what works and what doesn't. They explore different <b>aesthetics</b> and different
+  <b>interaction models</b> for the three core jobs: set the light · set a recurring wake · turn on/off.</p>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<div class="legend">
+  Tip: open any mockup full-screen and resize your browser narrow to feel the phone layout.
+  Advanced features (effects, DMX address, fixture profile, second alarm) are intentionally tucked away in most of these.
+</div>
+
+<script>
+const M=[
+  {f:'11-home.html',n:'★ 11',t:'Converged — home + tabs',d:'The synthesis of 3 + 7 + 8. A rich Home holds the everyday controls — set wake time & days, Auto/On/Off, turn on now, and a contextual “End morning”. Emoji tabs at the bottom lead to advanced pages (Schedule curve · Effects · Settings). Tap the status card to preview live states.',tags:['THE DIRECTION','Home + bottom tabs','Advanced hidden']},
+  {f:'01-alarm-list.html',n:'01',t:'Alarm list',d:'Familiar phone-alarm metaphor. Master toggle on top, a list of alarm rows you expand to edit. Maps directly to how people already think about alarms.',tags:['Recurring-first','Multiple alarms','Very familiar']},
+  {f:'02-sunrise-hero.html',n:'02',t:'Sunrise hero',d:'One big hero card: next wake time, a sunrise arc, day pills, and the two sliders that matter. Everything else is a quiet link below.',tags:['Single screen','Visual','Minimal']},
+  {f:'03-dashboard.html',n:'03',t:'Status dashboard',d:'Status-first home. A glowing lamp state, big Auto/On/Off, then summary cards for the next alarm and a quick light. Smart-home app feel.',tags:['Status-first','On/off prominent','Cards']},
+  {f:'04-timeline-curve.html',n:'04',t:'Timeline curve',d:'A refined evolution of the V1 ramp editor — the brightness + colour curve with editable waypoints, advanced collapsed into a drawer.',tags:['Power-user','Curve editor','Closest to V1']},
+  {f:'05-dial-light.html',n:'05',t:'Light dial',d:'“Set the light” comes first: a draggable brightness ring, a temperature slider, scene shortcuts. The alarm is a quiet strip at the bottom.',tags:['Light-first','Tactile dial','Scenes']},
+  {f:'06-bedtime-clock.html',n:'06',t:'Bedtime clock',d:'iOS-Bedtime style 24-hour dial. Drag the sun handle to set wake time and the sunrise wedge length directly on the clock. Dark theme.',tags:['Dark','Draggable clock','Distinctive']},
+  {f:'07-tabbed-mobile.html',n:'07',t:'Tabbed app',d:'Native-app pattern with a bottom tab bar: Home · Alarm · Light · More. Each job gets its own focused screen; advanced lives under More.',tags:['App-like','Bottom tabs','Scales well']},
+  {f:'08-wizard.html',n:'08',t:'Setup wizard',d:'A guided 4-step flow: when, which days, how gentle, confirm. Great for first-run; could double as the “new alarm” path.',tags:['Onboarding','Guided','One question at a time']},
+  {f:'09-warm-minimal.html',n:'09',t:'Warm minimal',d:'Editorial, serif, almost paper-like. A single quiet screen of essentials with one “Advanced” disclosure. The calmest of the set.',tags:['Editorial','Calm','Disclosure']},
+  {f:'10-scenes-cards.html',n:'10',t:'Scenes & widgets',d:'A widget board: next-alarm, lamp power, a brightness widget, and a grid of one-tap scenes. Most “smart-home dashboard” of the bunch.',tags:['Widgets','Scenes','Glanceable']},
+];
+document.getElementById('grid').innerHTML=M.map(m=>`
+  <div class="card">
+    <div class="frame"><div class="phone"><iframe src="${m.f}" loading="lazy" scrolling="no"></iframe></div></div>
+    <div class="cap">
+      <span class="n">${m.n}</span>
+      <h2>${m.t}</h2>
+      <p>${m.d}</p>
+      <div class="tags">${m.tags.map(t=>`<span>${t}</span>`).join('')}</div>
+      <a href="${m.f}" target="_blank">Open full screen →</a>
+    </div>
+  </div>`).join('');
+</script>
+</body>
+</html>

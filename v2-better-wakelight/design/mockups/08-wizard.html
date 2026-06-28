@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>08 · Setup wizard</title>
+<style>
+  :root{
+    --bg:#f5f0e8;--grad:#ecdfcd;--panel:#fdfaf4;--panel2:#f2ead9;
+    --line:#e6dbc7;--line2:#d8ccb5;--text:#2b2620;--muted:#8a7d6b;
+    --accent:#cc5500;--shadow:0 1px 2px rgba(58,43,24,.06),0 8px 22px rgba(58,43,24,.09);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;color:var(--text);
+    background:radial-gradient(1200px 700px at 50% -15%,var(--grad),var(--bg) 55%) fixed;
+    font:16px/1.5 -apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  main{max-width:440px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;
+    padding:max(env(safe-area-inset-top),26px) 20px 26px}
+  .prog{display:flex;gap:6px;margin-bottom:30px}
+  .prog i{flex:1;height:4px;border-radius:99px;background:var(--line2)}
+  .prog i.on{background:var(--accent)}
+  .step{display:none;flex:1;flex-direction:column}
+  .step.on{display:flex}
+  .q{font:600 27px/1.25 ui-serif,Georgia,serif;letter-spacing:-.01em;margin:8px 0 6px}
+  .q .m{color:var(--accent);font-style:italic}
+  .hint{color:var(--muted);font-size:14px;margin-bottom:26px}
+  .body{flex:1}
+  /* time step */
+  .timepick{display:flex;justify-content:center;align-items:baseline;gap:4px;margin:18px 0}
+  .timepick input{font:600 60px/1 ui-rounded,system-ui;letter-spacing:-.03em;border:0;background:transparent;
+    color:var(--text);width:auto;text-align:center}
+  .days{display:flex;justify-content:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .p{font-size:13px;font-weight:700;width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);
+    background:var(--panel);color:var(--muted);cursor:pointer}
+  .p.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .opts{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+  .opt{display:flex;align-items:center;gap:14px;background:var(--panel);border:1.5px solid var(--line);
+    border-radius:16px;padding:16px 18px;cursor:pointer;box-shadow:var(--shadow)}
+  .opt.on{border-color:var(--accent);background:#fbe9d8}
+  .opt .ic{font-size:24px}
+  .opt b{display:block;font-size:15px}.opt span{font-size:13px;color:var(--muted)}
+  .preview{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;
+    box-shadow:var(--shadow);text-align:center;margin-top:8px}
+  .preview .tm{font:600 40px/1 ui-rounded,system-ui}
+  .preview .dd{color:var(--muted);font-size:14px;margin-top:6px}
+  svg.arc{width:100%;height:90px;margin-top:10px}
+  .nav{display:flex;gap:12px;margin-top:24px}
+  button{font:inherit;font-weight:600;border-radius:14px;padding:16px;cursor:pointer;border:0;flex:1}
+  .primary{background:var(--accent);color:#fff;box-shadow:0 2px 12px rgba(204,85,0,.25)}
+  .ghost{background:transparent;border:1px solid var(--line2);color:var(--text);flex:0 0 96px}
+</style>
+</head>
+<body>
+<main>
+  <div class="prog"><i class="on" data-i="0"></i><i data-i="1"></i><i data-i="2"></i><i data-i="3"></i></div>
+
+  <section class="step on" data-s="0">
+    <div class="body">
+      <div class="q">When do you want to <span class="m">wake up</span>?</div>
+      <div class="hint">The light reaches full brightness at this time.</div>
+      <div class="timepick"><input type="time" value="07:00"></div>
+    </div>
+  </section>
+
+  <section class="step" data-s="1">
+    <div class="body">
+      <div class="q">Which <span class="m">days</span>?</div>
+      <div class="hint">Tap the days this alarm should repeat.</div>
+      <div class="days">
+        <button class="p on">M</button><button class="p on">T</button><button class="p on">W</button>
+        <button class="p on">T</button><button class="p on">F</button><button class="p">S</button><button class="p">S</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" data-s="2">
+    <div class="body">
+      <div class="q">How <span class="m">gentle</span> a sunrise?</div>
+      <div class="hint">How long the light takes to fade up before wake time.</div>
+      <div class="opts">
+        <div class="opt"><span class="ic">⚡</span><div><b>Quick — 15 min</b><span>A brisk start</span></div></div>
+        <div class="opt on"><span class="ic">☀️</span><div><b>Gentle — 30 min</b><span>The classic sunrise</span></div></div>
+        <div class="opt"><span class="ic">🌄</span><div><b>Slow — 45 min</b><span>Very gradual, deepest sleepers</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" data-s="3">
+    <div class="body">
+      <div class="q">You're <span class="m">all set</span></div>
+      <div class="hint">Here's your morning. You can fine-tune any time.</div>
+      <div class="preview">
+        <div class="tm">07:00</div>
+        <div class="dd">Mon–Fri · gentle 30-minute sunrise</div>
+        <svg class="arc" viewBox="0 0 300 90" preserveAspectRatio="none">
+          <path d="M0,86 C150,86 180,10 300,10" fill="none" stroke="#cc5500" stroke-width="3" stroke-linecap="round"/>
+          <path d="M0,86 C150,86 180,10 300,10 L300,90 L0,90 Z" fill="#cc5500" opacity=".12"/>
+          <circle cx="252" cy="20" r="9" fill="#ffce63" stroke="#fff" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <div class="nav">
+    <button class="ghost" id="back" style="display:none">Back</button>
+    <button class="primary" id="next">Next</button>
+  </div>
+</main>
+<script>
+let i=0;const steps=document.querySelectorAll('.step');const bars=document.querySelectorAll('.prog i');
+const next=document.getElementById('next'),back=document.getElementById('back');
+function show(){steps.forEach(s=>s.classList.toggle('on',+s.dataset.s===i));
+  bars.forEach(b=>b.classList.toggle('on',+b.dataset.i<=i));
+  back.style.display=i===0?'none':'block';
+  next.textContent=i===3?'Save & arm':'Next';}
+next.onclick=()=>{if(i<3){i++;show()}};
+back.onclick=()=>{if(i>0){i--;show()}};
+document.querySelectorAll('.p').forEach(p=>p.onclick=()=>p.classList.toggle('on'));
+document.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{
+  o.parentElement.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));o.classList.add('on');});
+</script>
+</body>
+</html>

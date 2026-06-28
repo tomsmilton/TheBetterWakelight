@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>02 · Sunrise hero</title>
+<style>
+  :root{
+    --bg:#f5f0e8;--grad:#ecdfcd;--panel:#fdfaf4;--panel2:#f2ead9;
+    --line:#e6dbc7;--line2:#d8ccb5;--text:#2b2620;--muted:#8a7d6b;
+    --accent:#cc5500;--ink:#fff;--shadow:0 1px 2px rgba(58,43,24,.06),0 8px 22px rgba(58,43,24,.09);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;color:var(--text);
+    background:radial-gradient(1200px 700px at 50% -20%,var(--grad),var(--bg) 55%) fixed;
+    font:16px/1.5 -apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  main{max-width:440px;margin:0 auto;padding:max(env(safe-area-inset-top),24px) 18px 60px}
+  .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  h1{font:600 24px/1 ui-serif,Georgia,serif;margin:0}
+  h1 .m{color:var(--accent);font-style:italic;font-weight:500}
+  .lamp{font-size:13px;color:var(--muted)}
+  .hero{background:var(--panel);border:1px solid var(--line);border-radius:24px;
+    padding:24px 22px 26px;box-shadow:var(--shadow);text-align:center;margin-top:14px}
+  .kick{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700}
+  .big{font:600 64px/1 ui-rounded,system-ui,sans-serif;letter-spacing:-.03em;margin:6px 0 2px;
+    font-variant-numeric:tabular-nums}
+  .when{color:var(--muted);font-size:14px}
+  .arc{display:block;width:100%;height:120px;margin:6px 0 2px}
+  .pills{display:flex;justify-content:center;gap:7px;margin:14px 0 4px}
+  .p{font-size:12.5px;font-weight:700;width:34px;height:34px;border-radius:50%;border:1px solid var(--line2);
+    background:var(--panel2);color:var(--muted);cursor:pointer;display:grid;place-items:center}
+  .p.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .slider{margin:22px 4px 4px;text-align:left}
+  .slabel{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:8px}
+  .slabel b{color:var(--text)}
+  input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+  .actions{display:flex;gap:10px;margin-top:22px}
+  button{flex:1;font:inherit;font-weight:600;border-radius:14px;padding:15px;cursor:pointer;border:0}
+  .primary{background:var(--accent);color:#fff;box-shadow:0 2px 12px rgba(204,85,0,.25)}
+  .ghost{background:var(--panel);border:1px solid var(--line2);color:var(--text)}
+  .more{display:flex;justify-content:space-between;align-items:center;margin-top:22px;
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow)}
+  .more .t b{display:block;font-size:14px}.more .t span{font-size:12.5px;color:var(--muted)}
+  .more a{color:var(--accent);font-size:13px;text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <div class="head"><h1>Wake<span class="m">light</span></h1><span class="lamp">Bedroom ▾</span></div>
+
+  <div class="hero">
+    <div class="kick">Next sunrise</div>
+    <div class="big">07:00</div>
+    <div class="when">Tomorrow · light starts 06:30</div>
+    <svg class="arc" viewBox="0 0 320 120" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#3a2c5a"/><stop offset="0.45" stop-color="#cc5500"/>
+          <stop offset="0.8" stop-color="#ffce63"/><stop offset="1" stop-color="#fff3cf"/>
+        </linearGradient>
+      </defs>
+      <line x1="20" y1="100" x2="300" y2="100" stroke="#d8ccb5" stroke-width="1.5"/>
+      <path d="M20,100 Q160,-25 300,100" fill="none" stroke="url(#sky)" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="248" cy="46" r="13" fill="#ffce63" stroke="#fff" stroke-width="2"/>
+      <text x="20" y="116" fill="#8a7d6b" font-size="11">06:30</text>
+      <text x="278" y="116" fill="#8a7d6b" font-size="11">07:00</text>
+    </svg>
+
+    <div class="pills">
+      <button class="p on">M</button><button class="p on">T</button><button class="p on">W</button>
+      <button class="p on">T</button><button class="p on">F</button><button class="p">S</button><button class="p">S</button>
+    </div>
+
+    <div class="slider">
+      <div class="slabel"><span>Sunrise length</span><b id="lenv">30 min</b></div>
+      <input type="range" min="5" max="60" value="30" oninput="lenv.textContent=this.value+' min'">
+    </div>
+    <div class="slider" style="margin-top:14px">
+      <div class="slabel"><span>Wake brightness</span><b id="brv">100%</b></div>
+      <input type="range" min="20" max="100" value="100" oninput="brv.textContent=this.value+'%'">
+    </div>
+
+    <div class="actions">
+      <button class="ghost">Skip tomorrow</button>
+      <button class="primary">Save</button>
+    </div>
+  </div>
+
+  <div class="more">
+    <div class="t"><b>Light it now</b><span>Manual brightness &amp; colour</span></div>
+    <a href="#">Open →</a>
+  </div>
+  <div class="more">
+    <div class="t"><b>Add another alarm</b><span>Weekends, naps, second routine</span></div>
+    <a href="#">＋ Add</a>
+  </div>
+</main>
+<script>document.querySelectorAll('.p').forEach(b=>b.onclick=()=>b.classList.toggle('on'));</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>07 · Tabbed mobile</title>
+<style>
+  :root{
+    --bg:#f5f0e8;--grad:#ecdfcd;--panel:#fdfaf4;--panel2:#f2ead9;
+    --line:#e6dbc7;--line2:#d8ccb5;--text:#2b2620;--muted:#8a7d6b;
+    --accent:#cc5500;--shadow:0 1px 2px rgba(58,43,24,.06),0 6px 18px rgba(58,43,24,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;color:var(--text);
+    background:radial-gradient(1200px 700px at 10% -10%,var(--grad),var(--bg) 55%) fixed;
+    font:16px/1.5 -apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .phone{max-width:400px;margin:0 auto;min-height:100vh;padding:max(env(safe-area-inset-top),20px) 16px 96px;position:relative}
+  .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  h1{font:600 22px/1 ui-serif,Georgia,serif;margin:0}
+  h1 .m{color:var(--accent);font-style:italic;font-weight:500}
+  .lamp{font-size:13px;color:var(--muted)}
+  .panel{display:none}.panel.on{display:block}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;
+    box-shadow:var(--shadow);margin-bottom:14px}
+  .glow{width:72px;height:72px;border-radius:50%;margin:2px auto 12px;
+    background:radial-gradient(circle at 50% 40%,#fff3cf,#ffce63 45%,#cc5500 100%);
+    box-shadow:0 0 0 9px rgba(255,206,99,.18),0 0 30px rgba(204,85,0,.32)}
+  .state{text-align:center}
+  .state b{font:600 20px/1.1 ui-serif,Georgia,serif;display:block}
+  .state span{color:var(--muted);font-size:13px}
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+  .seg button{background:var(--panel2);border:1px solid var(--line2);color:var(--text);font:inherit;
+    font-weight:600;padding:13px;border-radius:12px;cursor:pointer}
+  .seg button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .h2{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;margin:0 0 12px}
+  .bit{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+  .bit .tm{font:600 30px/1 ui-rounded,system-ui;letter-spacing:-.02em}
+  .bit .dd{font-size:13px;color:var(--muted)}
+  .days{display:flex;gap:6px;margin:12px 0}
+  .d{font-size:12px;font-weight:700;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+    background:var(--panel2);color:var(--muted);cursor:pointer;border:1px solid var(--line2)}
+  .d.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .frow{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-top:1px solid var(--line)}
+  .frow:first-of-type{border-top:0}
+  .frow label{font-size:14px}
+  .frow input[type=time]{font:inherit;font-size:15px;background:var(--panel2);border:1px solid var(--line2);border-radius:9px;padding:7px 10px}
+  .frow input[type=range]{accent-color:var(--accent);width:140px}
+  .lr{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin:14px 0 8px}
+  .lr b{color:var(--text)}
+  input[type=range].full{width:100%;accent-color:var(--accent);height:26px}
+  .temp{position:relative;height:30px;border-radius:99px;border:1px solid var(--line2);
+    background:linear-gradient(90deg,#ffb070,#ffe6b8,#fff5e0,#eaf0ff,#cfe0ff);margin-bottom:6px}
+  .temp .kn{position:absolute;top:50%;left:18%;width:26px;height:26px;border-radius:50%;background:#fff;
+    border:2px solid var(--accent);transform:translate(-50%,-50%);box-shadow:0 2px 6px rgba(0,0,0,.2)}
+  .list .item{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
+  .list .item:first-child{border-top:0}
+  .list .item span{color:var(--muted);font-size:13px}
+  /* tab bar */
+  .tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:min(372px,calc(100% - 28px));
+    display:grid;grid-template-columns:repeat(4,1fr);background:var(--panel);border:1px solid var(--line2);
+    border-radius:20px;box-shadow:0 8px 28px rgba(58,43,24,.16);padding:6px}
+  .tab{background:transparent;border:0;font:inherit;font-size:11px;font-weight:600;color:var(--muted);
+    padding:9px 0 7px;border-radius:14px;cursor:pointer;text-align:center}
+  .tab .ic{display:block;font-size:19px;margin-bottom:2px}
+  .tab.on{color:var(--accent);background:var(--panel2)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="head"><h1>Wake<span class="m">light</span></h1><span class="lamp">Bedroom ▾</span></div>
+
+  <!-- HOME -->
+  <section class="panel on" data-p="home">
+    <div class="card state">
+      <div class="glow"></div>
+      <b>Sleeping</b><span>Sunrise begins 06:30 tomorrow</span>
+      <div class="seg"><button class="on">Auto</button><button>On</button><button>Off</button></div>
+    </div>
+    <div class="card">
+      <p class="h2">Next alarm</p>
+      <div class="bit"><span class="tm">07:00</span><span class="dd">Mon–Fri · 30 min sunrise</span></div>
+    </div>
+  </section>
+
+  <!-- ALARM -->
+  <section class="panel" data-p="alarm">
+    <div class="card">
+      <p class="h2">Wake schedule</p>
+      <div class="frow"><label>Wake time</label><input type="time" value="07:00"></div>
+      <div class="days">
+        <span class="d on">M</span><span class="d on">T</span><span class="d on">W</span>
+        <span class="d on">T</span><span class="d on">F</span><span class="d">S</span><span class="d">S</span>
+      </div>
+      <div class="frow"><label>Sunrise length</label><input type="range" min="5" max="60" value="30"></div>
+      <div class="frow"><label>Stay on after</label><input type="range" min="0" max="60" value="15"></div>
+    </div>
+  </section>
+
+  <!-- LIGHT -->
+  <section class="panel" data-p="light">
+    <div class="card">
+      <p class="h2">Light it now</p>
+      <div class="lr"><span>Brightness</span><b id="bv">0%</b></div>
+      <input type="range" class="full" min="0" max="100" value="0" oninput="bv.textContent=this.value+'%'">
+      <div class="lr"><span>Colour temperature</span><b>3000K</b></div>
+      <div class="temp"><div class="kn"></div></div>
+    </div>
+  </section>
+
+  <!-- MORE -->
+  <section class="panel" data-p="more">
+    <div class="card list">
+      <p class="h2">Advanced</p>
+      <div class="item"><label>Light effects</label><span>17 effects ›</span></div>
+      <div class="item"><label>Second alarm</label><span>Off ›</span></div>
+      <div class="item"><label>This lamp</label><span>Bedroom ›</span></div>
+      <div class="item"><label>DMX address</label><span>1 ›</span></div>
+      <div class="item"><label>Fixture profile</label><span>Neewer PL60C ›</span></div>
+      <div class="item"><label>Wi-Fi</label><span>Reset ›</span></div>
+    </div>
+  </section>
+
+  <nav class="tabs">
+    <button class="tab on" data-t="home"><span class="ic">🏠</span>Home</button>
+    <button class="tab" data-t="alarm"><span class="ic">⏰</span>Alarm</button>
+    <button class="tab" data-t="light"><span class="ic">💡</span>Light</button>
+    <button class="tab" data-t="more"><span class="ic">⋯</span>More</button>
+  </nav>
+</div>
+<script>
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.dataset.p===t.dataset.t));
+  window.scrollTo(0,0);
+});
+document.querySelectorAll('.d').forEach(d=>d.onclick=()=>d.classList.toggle('on'));
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
+</script>
+</body>
+</html>

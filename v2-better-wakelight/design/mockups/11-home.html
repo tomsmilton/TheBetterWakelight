@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>11 · Converged — home + tabs</title>
+<style>
+  :root{
+    --bg:#f5f0e8;--grad:#ecdfcd;--panel:#fdfaf4;--panel2:#f2ead9;
+    --line:#e6dbc7;--line2:#d8ccb5;--text:#2b2620;--muted:#8a7d6b;--faint:#b8ab95;
+    --accent:#cc5500;--good:#6a8f3a;--shadow:0 1px 2px rgba(58,43,24,.06),0 6px 18px rgba(58,43,24,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;color:var(--text);
+    background:radial-gradient(1200px 700px at 10% -10%,var(--grad),var(--bg) 55%) fixed;
+    font:16px/1.5 -apple-system,system-ui,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+  .phone{max-width:420px;margin:0 auto;min-height:100vh;
+    padding:max(env(safe-area-inset-top),20px) 16px 104px;position:relative}
+  .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  h1{font:600 23px/1 ui-serif,"Iowan Old Style",Georgia,serif;margin:0}
+  h1 .m{color:var(--accent);font-style:italic;font-weight:500}
+  .lamp{font-size:13px;color:var(--muted)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;
+    box-shadow:var(--shadow);margin-bottom:14px}
+  .h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;margin:0}
+  .panel{display:none}.panel.on{display:block}
+
+  /* generic toggle */
+  .sw{--w:48px;--h:28px;position:relative;width:var(--w);height:var(--h);flex:0 0 var(--w)}
+  .sw input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+  .sw .tr{position:absolute;inset:0;background:#d8ccb5;border-radius:99px;transition:.2s}
+  .sw .kn{position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;
+    box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+  .sw input:checked + .tr{background:var(--accent)}
+  .sw input:checked + .tr + .kn{transform:translateX(20px)}
+
+  /* ---------- status hero ---------- */
+  .state{text-align:center;position:relative}
+  .state .hint{position:absolute;top:8px;right:10px;font-size:10px;color:var(--faint);cursor:pointer}
+  .glow{width:80px;height:80px;border-radius:50%;margin:8px auto 12px;transition:.4s;
+    background:radial-gradient(circle at 50% 40%,#fff3cf,#ffce63 45%,#cc5500 100%);
+    box-shadow:0 0 0 9px rgba(255,206,99,.18),0 0 32px rgba(204,85,0,.34)}
+  .glow.dim{background:radial-gradient(circle at 50% 40%,#e9e0d0,#cdbfa6 60%,#b3a587);
+    box-shadow:0 0 0 9px rgba(180,165,140,.13)}
+  .glow.ramp{animation:breathe 1.8s ease-in-out infinite}
+  @keyframes breathe{0%,100%{box-shadow:0 0 0 9px rgba(255,206,99,.18),0 0 32px rgba(204,85,0,.34)}
+    50%{box-shadow:0 0 0 16px rgba(255,206,99,.10),0 0 44px rgba(204,85,0,.5)}}
+  .state .lab{font:600 22px/1.1 ui-serif,Georgia,serif}
+  .state .sub{color:var(--muted);font-size:13.5px;margin-top:5px}
+  .endbar{display:none;align-items:center;gap:12px;margin-top:16px;background:#fbe9d8;border:1px solid #f3d4b6;
+    border-radius:14px;padding:12px 14px;text-align:left}
+  .endbar.show{display:flex}
+  .endbar .t{flex:1;font-size:12.5px}.endbar .t b{display:block;font-size:13.5px}
+  .endbar .t span{color:var(--muted)}
+  .endbar button{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:9px 14px;
+    font:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+
+  /* ---------- card head with toggle ---------- */
+  .ch{display:flex;justify-content:space-between;align-items:center}
+  .ch .lbl{display:flex;align-items:center;gap:10px}
+  .ch .word{font-size:12px;font-weight:700;color:var(--accent)}
+  .ch .word.off{color:var(--muted)}
+
+  /* ---------- time scroller ---------- */
+  .scroller{position:relative;display:flex;align-items:center;justify-content:center;gap:2px;height:150px;margin-top:10px}
+  .band{position:absolute;left:24px;right:24px;top:50px;height:50px;border-top:1px solid var(--line2);
+    border-bottom:1px solid var(--line2);border-radius:10px;background:var(--panel2);pointer-events:none}
+  .col{height:150px;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;
+    text-align:center;width:78px;padding:50px 0;position:relative;z-index:1}
+  .col::-webkit-scrollbar{display:none}
+  .col .it{height:50px;line-height:50px;scroll-snap-align:center;
+    font:600 34px/50px ui-rounded,system-ui;letter-spacing:-.02em;color:var(--faint);transition:color .15s}
+  .col .it.sel{color:var(--text)}
+  .colon{font:600 30px/1 ui-rounded,system-ui;color:var(--text);z-index:1}
+
+  /* ---------- manual quick (home) ---------- */
+  .body-dim{transition:.2s}
+  .card.disabled .body-dim{opacity:.45;pointer-events:none;filter:grayscale(.4)}
+  .lr{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted);margin:14px 0 8px}
+  .lr b{color:var(--text)}
+  input[type=range].full{width:100%;accent-color:var(--accent);height:26px}
+  .temp{position:relative;height:30px;border-radius:99px;border:1px solid var(--line2);
+    background:linear-gradient(90deg,#ffb070,#ffe6b8,#fff5e0,#eaf0ff,#cfe0ff)}
+  .temp .kn{position:absolute;top:50%;left:14%;width:26px;height:26px;border-radius:50%;background:#fff;
+    border:2px solid var(--accent);transform:translate(-50%,-50%);box-shadow:0 2px 6px rgba(0,0,0,.2)}
+  .hintnote{color:var(--muted);font-size:12px;margin-top:12px}
+  .endbtn{display:block;width:100%;margin-top:14px;background:transparent;border:1px solid var(--line2);
+    color:var(--text);font:inherit;font-weight:600;font-size:14px;border-radius:12px;padding:13px;cursor:pointer}
+  .endbtn.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 10px rgba(204,85,0,.22)}
+
+  /* ---------- schedule: days ---------- */
+  .days{display:flex;gap:6px;margin-top:12px}
+  .d{font-size:12px;font-weight:700;flex:1;height:36px;border-radius:9px;display:grid;place-items:center;
+    background:var(--panel2);color:var(--muted);cursor:pointer;border:1px solid var(--line2)}
+  .d.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  /* ---------- schedule: curve ---------- */
+  .curvewrap{margin-top:6px}
+  .curve{display:block;width:100%;height:170px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:12px;touch-action:none}
+  .curve .axis{stroke:var(--line2);stroke-width:1}
+  .curve .grid{stroke:var(--line2);stroke-dasharray:2 5;stroke-width:1}
+  .curve .area{fill:var(--accent);opacity:.14}
+  .curve .line{fill:none;stroke:var(--accent);stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+  .curve .lbl{fill:var(--muted);font:10px -apple-system,system-ui,sans-serif}
+  .curve .handle{fill:#fff;stroke:var(--accent);stroke-width:2.5;cursor:grab}
+  .curve .handle.move{fill:var(--accent);stroke:#fff;stroke-width:2.5}
+  .curve .handle:active{cursor:grabbing}
+  .curve .tip{fill:var(--text);font:600 11px -apple-system,system-ui,sans-serif}
+  .curve .tipbg{fill:#fff;stroke:var(--line2)}
+  .cctramp{display:flex;align-items:center;height:42px;margin-top:8px;border-radius:12px;overflow:hidden;border:1px solid var(--line2)}
+  .cctfill{flex:1;height:100%}
+  .cctend{position:relative;width:48px;height:100%;border:0;padding:0;cursor:pointer;flex:0 0 48px}
+  .cctend input[type=color]{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0;margin:0}
+  .cctend::after{content:'edit';position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:8.5px;
+    font-weight:700;letter-spacing:.04em;color:rgba(43,38,32,.55);text-transform:uppercase}
+  .cctlabels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:7px;font-weight:600}
+
+  /* list rows */
+  .list .item{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-top:1px solid var(--line);cursor:pointer}
+  .list .item:first-child{border-top:0}
+  .list .item .l b{display:block;font-size:14.5px}
+  .list .item .l span{font-size:12.5px;color:var(--muted)}
+  .list .item .r{color:var(--muted);font-size:13px}
+
+  /* manual tab */
+  .swatch{width:100%;height:54px;border-radius:12px;border:1px solid var(--line2);margin:4px 0 6px;
+    background:#ffd9a6;transition:background .15s}
+  .fx{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .fxc{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:14px;text-align:center;cursor:pointer}
+  .fxc.on{background:#fbe9d8;border-color:var(--accent)}
+  .fxc .ic{font-size:22px}.fxc .nm{font-size:12.5px;font-weight:600;margin-top:6px}
+  .fxchip{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--panel2);
+    border:1px solid var(--line);border-radius:11px;padding:11px 13px;font:inherit;font-size:14px;font-weight:600;
+    color:var(--text);cursor:pointer;margin-bottom:8px}
+  .fxchip.on{background:#fbe9d8;border-color:var(--accent)}
+  .fxchip .ic{font-size:18px;flex:0 0 22px}
+  .list .item.locked{opacity:.5;cursor:default}
+
+  /* ---------- bottom tabs ---------- */
+  .tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:min(392px,calc(100% - 24px));
+    display:grid;grid-template-columns:repeat(4,1fr);background:var(--panel);border:1px solid var(--line2);
+    border-radius:20px;box-shadow:0 8px 28px rgba(58,43,24,.18);padding:6px;z-index:5}
+  .tab{background:transparent;border:0;font:inherit;font-size:10.5px;font-weight:600;color:var(--muted);
+    padding:8px 0 6px;border-radius:14px;cursor:pointer;text-align:center}
+  .tab .ic{display:block;font-size:20px;margin-bottom:2px}
+  .tab.on{color:var(--accent);background:var(--panel2)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="head"><h1>Wake<span class="m">light</span></h1><span class="lamp">Bedroom ▾</span></div>
+
+  <!-- ===================== HOME ===================== -->
+  <section class="panel on" data-p="home">
+
+    <div class="card state">
+      <div class="glow dim" id="glow"></div>
+      <div class="lab" id="stateLab">Standing by</div>
+      <div class="sub" id="stateSub">Wake-up at 07:00 · sunrise from 06:30</div>
+    </div>
+
+    <div class="card">
+      <div class="ch">
+        <p class="h2">Wake-up alarm</p>
+        <div class="lbl"><span class="word" id="wakeWord">On</span>
+          <label class="sw"><input type="checkbox" id="wakeSw" checked><span class="tr"></span><span class="kn"></span></label></div>
+      </div>
+      <div class="scroller" id="scroller">
+        <div class="band"></div>
+        <div class="col" id="hCol"></div>
+        <div class="colon">:</div>
+        <div class="col" id="mCol"></div>
+      </div>
+      <button class="endbtn" id="endToday">End today’s wake-up</button>
+      <p class="hintnote" id="endNote">Stops a wake-up that’s running now (or skips today’s) — the alarm stays on for tomorrow.</p>
+    </div>
+
+    <div class="card disabled" id="manualCard">
+      <div class="ch">
+        <p class="h2">Turn the light on now</p>
+        <div class="lbl"><span class="word off" id="onWord">Off</span>
+          <label class="sw"><input type="checkbox" id="onSw"><span class="tr"></span><span class="kn"></span></label></div>
+      </div>
+      <div class="body-dim">
+        <div class="lr"><span>Brightness</span><b id="bv">65%</b></div>
+        <input type="range" class="full" min="0" max="100" value="65" oninput="bv.textContent=this.value+'%'">
+        <div class="lr"><span>Warmth</span><b>3000K</b></div>
+        <div class="temp"><div class="kn"></div></div>
+        <div class="hintnote">Overrides the schedule until you switch it off. Full colour &amp; effects live in the Manual tab.</div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===================== SCHEDULE ===================== -->
+  <section class="panel" data-p="sched">
+
+    <div class="card curvewrap">
+      <p class="h2" style="margin-bottom:8px">Sunrise shape</p>
+      <svg class="curve" id="curve" viewBox="0 0 360 170" aria-hidden="true"></svg>
+      <p class="hintnote" style="margin-top:8px">👆 Drag any orange dot up or down to shape how the brightness eases up. A gentle S keeps the start soft and the finish from jumping.</p>
+
+      <p class="h2" style="margin:18px 0 8px">Colour through the ramp</p>
+      <div class="cctramp">
+        <label class="cctend" id="cctStartSw"><input type="color" id="cctStart" value="#ff9d57"></label>
+        <div class="cctfill" id="cctbar"></div>
+        <label class="cctend" id="cctEndSw"><input type="color" id="cctEnd" value="#dde7ff"></label>
+      </div>
+      <div class="cctlabels"><span id="cctStartV">Start · warm ember</span><span id="cctEndV">cool daylight · End</span></div>
+      <p class="hintnote" style="margin-top:8px">Tap either end to pick its colour. The lamp fades from the left colour to the right one across the sunrise.</p>
+    </div>
+
+    <div class="card list">
+      <div class="item"><div class="l"><b>Sunrise length</b><span>how long the fade-up takes</span></div><div class="r">30 min ›</div></div>
+      <div class="item"><div class="l"><b>Final brightness</b><span>how bright it ends</span></div><div class="r">100% ›</div></div>
+      <div class="item"><div class="l"><b>Stay on after wake</b><span>hold before it lets go</span></div><div class="r">15 min ›</div></div>
+      <div class="item"><div class="l"><b>Second alarm</b><span>e.g. a weekend lie-in</span></div><div class="r">Off ›</div></div>
+    </div>
+
+  </section>
+
+  <!-- ===================== MANUAL ===================== -->
+  <section class="panel" data-p="man">
+
+    <div class="card disabled" id="manualLightCard">
+      <div class="ch">
+        <p class="h2">Light</p>
+        <div class="lbl"><span class="word off" id="onWord2">Off</span>
+          <label class="sw"><input type="checkbox" id="onSw2"><span class="tr"></span><span class="kn"></span></label></div>
+      </div>
+      <div class="body-dim">
+      <div class="swatch" id="swatch"></div>
+      <div class="lr"><span>Brightness</span><b id="mbv">70%</b></div>
+      <input type="range" class="full" id="mb" min="0" max="100" value="70">
+
+      <div class="ch" style="margin-top:16px">
+        <span class="lr" style="margin:0">Colour mode</span>
+        <div class="lbl"><span class="word off" id="hsiWord">White (CCT)</span>
+          <label class="sw"><input type="checkbox" id="hsiSw"><span class="tr"></span><span class="kn"></span></label></div>
+      </div>
+
+      <div id="cctMode">
+        <div class="lr"><span>Warmth</span><b id="mcctv">3200K</b></div>
+        <input type="range" class="full" id="mcct" min="2500" max="10000" step="50" value="3200">
+        <div class="lr"><span>Green ↔ Magenta</span><b id="mgmv">0</b></div>
+        <input type="range" class="full" id="mgm" min="-50" max="50" value="0">
+      </div>
+
+      <div id="hsiModeBox" style="display:none">
+        <div class="lr"><span>Hue</span><b id="mhuev">30°</b></div>
+        <input type="range" class="full" id="mhue" min="0" max="360" value="30">
+        <div class="lr"><span>Saturation</span><b id="msatv">100%</b></div>
+        <input type="range" class="full" id="msat" min="0" max="100" value="100">
+      </div>
+      </div><!-- /body-dim -->
+    </div>
+
+    <div class="card">
+      <p class="h2">Effects</p>
+      <div class="fx" id="fxPopular" style="margin-top:12px"></div>
+      <button class="endbtn" id="fxToggle" style="margin-top:12px">Show all effects (17)</button>
+      <div id="fxAll" style="display:none;margin-top:12px"></div>
+      <p class="hintnote">Tap an effect to run it on the lamp.</p>
+    </div>
+
+  </section>
+
+  <!-- ===================== SETTINGS ===================== -->
+  <section class="panel" data-p="set">
+    <div class="card list">
+      <p class="h2">This lamp</p>
+      <div class="item"><div class="l"><b>Name</b><span>shown across your network</span></div><div class="r">Bedroom ›</div></div>
+      <div class="item"><div class="l"><b>Address</b><span>reach it on Wi-Fi</span></div><div class="r">bedroom.local ›</div></div>
+    </div>
+    <div class="card list">
+      <p class="h2">Fixture</p>
+      <div class="item"><div class="l"><b>DMX address</b><span>match the number set on the lamp</span></div><div class="r">1 ›</div></div>
+      <div class="item locked"><div class="l"><b>Fixture profile</b><span>fixed to this board for now</span></div><div class="r">Neewer PL60C</div></div>
+      <div class="item"><div class="l"><b>Colour range</b><span>warmest–coolest it can do</span></div><div class="r">2500–10000K ›</div></div>
+    </div>
+    <div class="card list">
+      <p class="h2">System</p>
+      <div class="item"><div class="l"><b>Time &amp; location</b><span>sunrise timing &amp; DST</span></div><div class="r">Auto ›</div></div>
+      <div class="item"><div class="l"><b>Wi-Fi</b><span>network this lamp joins</span></div><div class="r">Reset ›</div></div>
+    </div>
+  </section>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-t="home"><span class="ic">🏠</span>Home</button>
+    <button class="tab" data-t="sched"><span class="ic">📈</span>Schedule</button>
+    <button class="tab" data-t="man"><span class="ic">🎛️</span>Manual</button>
+    <button class="tab" data-t="set"><span class="ic">⚙️</span>Settings</button>
+  </nav>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+
+// ---------- tabs ----------
+$$('.tab').forEach(t=>t.onclick=()=>{
+  $$('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
+  $$('.panel').forEach(p=>p.classList.toggle('on',p.dataset.p===t.dataset.t));
+  window.scrollTo(0,0);
+});
+$$('.d').forEach(d=>d.onclick=()=>d.classList.toggle('on'));
+
+// ---------- effects: popular grid + full list of all 17 ----------
+const EFFECTS=[
+  {id:'candlelight',n:'Candle',e:'🕯️',pop:1},
+  {id:'lightning',n:'Lightning',e:'⚡',pop:1},
+  {id:'tv_screen',n:'TV screen',e:'📺',pop:1},
+  {id:'fireworks',n:'Fireworks',e:'🎆',pop:1},
+  {id:'cop_car',n:'Cop car',e:'🚓',pop:1},
+  {id:'party',n:'Party',e:'🎉',pop:1},
+  {id:'paparazzi',n:'Paparazzi',e:'📸'},
+  {id:'defective_bulb',n:'Defective bulb',e:'💡'},
+  {id:'explosion',n:'Explosion',e:'💥'},
+  {id:'welding',n:'Welding',e:'🔩'},
+  {id:'cct_flash',n:'CCT flash',e:'🔆'},
+  {id:'hue_flash',n:'Hue flash',e:'🌈'},
+  {id:'cct_pulse',n:'CCT pulse',e:'🔅'},
+  {id:'hue_pulse',n:'Hue pulse',e:'🎨'},
+  {id:'hue_loop',n:'Hue loop',e:'🔁'},
+  {id:'cct_loop',n:'CCT loop',e:'♻️'},
+  {id:'int_loop',n:'Intensity loop',e:'🔄'},
+];
+function selectFx(id){$$('[data-fx]').forEach(x=>x.classList.toggle('on',x.dataset.fx===id));setOverride(true);}
+$('#fxPopular').innerHTML=EFFECTS.filter(f=>f.pop)
+  .map(f=>`<div class="fxc" data-fx="${f.id}"><div class="ic">${f.e}</div><div class="nm">${f.n}</div></div>`).join('');
+$('#fxAll').innerHTML=EFFECTS
+  .map(f=>`<button class="fxchip" data-fx="${f.id}"><span class="ic">${f.e}</span>${f.n}</button>`).join('');
+$$('[data-fx]').forEach(el=>el.addEventListener('click',()=>selectFx(el.dataset.fx)));
+$('#fxToggle').addEventListener('click',()=>{const open=$('#fxAll').style.display!=='none';
+  $('#fxAll').style.display=open?'none':'block';$('#fxToggle').textContent=open?'Show all effects (17)':'Hide full list';});
+
+// ---------- state model ----------
+let wakeOn=true, overrideOn=false, ramping=false;
+const glow=$('#glow'),lab=$('#stateLab'),sub=$('#stateSub'),endBtn=$('#endToday');
+function recompute(){
+  glow.className='glow';
+  // the "end today's wake-up" button only matters while the alarm is on
+  endBtn.disabled=!wakeOn;
+  endBtn.classList.toggle('active',ramping);
+  endBtn.textContent=ramping?'End this wake-up now':'End today’s wake-up';
+  if(ramping){glow.classList.add('ramp');lab.textContent='Good morning';sub.textContent='Sunrise ramping · 18 min to full';}
+  else if(overrideOn){lab.textContent='Light on';sub.textContent='Manual override · 65% · 3000K';}
+  else if(wakeOn){glow.classList.add('dim');lab.textContent='Standing by';sub.textContent='Wake-up at '+timeStr()+' · sunrise from '+minus(timeStr(),30);}
+  else {glow.classList.add('dim');lab.textContent='Alarm off';sub.textContent='No wake-up scheduled';}
+}
+// override is shared by Home's "Turn on now" and Manual's "Light" toggles
+function setOverride(v){
+  overrideOn=v;
+  $('#onSw').checked=v; $('#onSw2').checked=v;
+  $('#manualCard').classList.toggle('disabled',!v);
+  $('#manualLightCard').classList.toggle('disabled',!v);
+  $('#onWord').textContent=v?'On':'Off'; $('#onWord').classList.toggle('off',!v);
+  $('#onWord2').textContent=v?'On':'Off'; $('#onWord2').classList.toggle('off',!v);
+  if(v)ramping=false;
+  recompute();
+}
+$('#wakeSw').addEventListener('change',e=>{wakeOn=e.target.checked;
+  $('#wakeWord').textContent=wakeOn?'On':'Off';$('#wakeWord').classList.toggle('off',!wakeOn);
+  if(!wakeOn)ramping=false;recompute();});
+$('#onSw').addEventListener('change',e=>setOverride(e.target.checked));
+$('#onSw2').addEventListener('change',e=>setOverride(e.target.checked));
+$('#endToday').addEventListener('click',()=>{if(endBtn.disabled)return;ramping=false;recompute();
+  sub.textContent='Skipped today · resumes tomorrow';});
+
+// ---------- time scroller ----------
+const hCol=$('#hCol'),mCol=$('#mCol');
+for(let h=0;h<24;h++)hCol.innerHTML+=`<div class="it">${String(h).padStart(2,'0')}</div>`;
+for(let m=0;m<60;m+=5)mCol.innerHTML+=`<div class="it">${String(m).padStart(2,'0')}</div>`;
+function selOf(col){return Math.round(col.scrollTop/50);}
+function markSel(col){const i=selOf(col);[...col.children].forEach((c,k)=>c.classList.toggle('sel',k===i));}
+function timeStr(){const h=selOf(hCol),m=selOf(mCol)*5;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');}
+function minus(t,mins){let[h,m]=t.split(':').map(Number);let tot=h*60+m-mins;tot=(tot+1440)%1440;
+  return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
+[hCol,mCol].forEach(col=>{let to;col.addEventListener('scroll',()=>{markSel(col);
+  clearTimeout(to);to=setTimeout(()=>{if(!overrideOn&&!ramping)recompute();},120);});});
+// init at 07:00
+requestAnimationFrame(()=>{hCol.scrollTop=7*50;mCol.scrollTop=0;markSel(hCol);markSel(mCol);recompute();});
+
+// ---------- draggable sigmoid curve ----------
+const curve=$('#curve');
+const PL=24,PR=340,PT=14,PB=146; // plot box in viewBox units
+// normalized points: x 0..1 (time), b 0..1 (brightness). endpoints fixed.
+let pts=[{x:0,b:0,fix:true},{x:.33,b:.10},{x:.55,b:.35},{x:.78,b:.78},{x:1,b:1,fix:true}];
+const nx=x=>PL+x*(PR-PL), nb=b=>PB-b*(PB-PT);
+function smoothPath(P){ // catmull-rom through points -> cubic bezier
+  let d=`M${nx(P[0].x).toFixed(1)},${nb(P[0].b).toFixed(1)}`;
+  for(let i=0;i<P.length-1;i++){
+    const p0=P[i-1]||P[i],p1=P[i],p2=P[i+1],p3=P[i+2]||P[i+1];
+    const c1x=p1.x+(p2.x-p0.x)/6, c1y=p1.b+(p2.b-p0.b)/6;
+    const c2x=p2.x-(p3.x-p1.x)/6, c2y=p2.b-(p3.b-p1.b)/6;
+    d+=` C${nx(c1x).toFixed(1)},${nb(c1y).toFixed(1)} ${nx(c2x).toFixed(1)},${nb(c2y).toFixed(1)} ${nx(p2.x).toFixed(1)},${nb(p2.b).toFixed(1)}`;
+  }
+  return d;
+}
+let dragIdx=-1;
+function renderCurve(){
+  const line=smoothPath(pts);
+  const area=`${line} L${nx(1).toFixed(1)},${PB} L${nx(0).toFixed(1)},${PB} Z`;
+  const handles=pts.map((p,i)=>`<circle class="handle${p.fix?'':' move'}" data-i="${i}" cx="${nx(p.x).toFixed(1)}" cy="${nb(p.b).toFixed(1)}" r="${p.fix?5:8}"/>`).join('');
+  let tip='';
+  if(dragIdx>=0){const p=pts[dragIdx],tx=nx(p.x),ty=nb(p.b)-16,txt=Math.round(p.b*100)+'%';
+    tip=`<rect class="tipbg" x="${tx-17}" y="${ty-12}" width="34" height="17" rx="5"/><text class="tip" x="${tx}" y="${ty}" text-anchor="middle">${txt}</text>`;}
+  curve.innerHTML=`
+    <line class="grid" x1="${PL}" y1="${nb(1)}" x2="${PR}" y2="${nb(1)}"/>
+    <line class="grid" x1="${PL}" y1="${nb(.5)}" x2="${PR}" y2="${nb(.5)}"/>
+    <line class="axis" x1="${PL}" y1="${PB}" x2="${PR}" y2="${PB}"/>
+    <text class="lbl" x="3" y="${nb(1)+3}" text-anchor="start">100%</text>
+    <text class="lbl" x="3" y="${PB+3}" text-anchor="start">0%</text>
+    <text class="lbl" x="${PL}" y="166" text-anchor="start">06:30</text>
+    <text class="lbl" x="${PR}" y="166" text-anchor="end">07:00 wake</text>
+    <path class="area" d="${area}"/>
+    <path class="line" d="${line}"/>
+    ${handles}${tip}`;
+  curve.querySelectorAll('.handle').forEach(h=>h.addEventListener('pointerdown',startDrag));
+}
+function startDrag(e){
+  e.preventDefault();
+  const i=+e.target.dataset.i,p=pts[i];dragIdx=i;
+  const move=ev=>{
+    const r=curve.getBoundingClientRect();
+    // viewBox is letterboxed (preserveAspectRatio meet); map pointer through the actual scale
+    const scale=Math.min(r.width/360,r.height/170);
+    const offX=(r.width-360*scale)/2, offY=(r.height-170*scale)/2;
+    const vx=(ev.clientX-r.left-offX)/scale, vy=(ev.clientY-r.top-offY)/scale;
+    let b=(PB-vy)/(PB-PT); b=Math.max(0,Math.min(1,b)); p.b=b;
+    if(!p.fix){ let x=(vx-PL)/(PR-PL);
+      const lo=pts[i-1].x+.04, hi=pts[i+1].x-.04; p.x=Math.max(lo,Math.min(hi,x)); }
+    renderCurve();
+  };
+  const up=()=>{dragIdx=-1;renderCurve();removeEventListener('pointermove',move);removeEventListener('pointerup',up)};
+  addEventListener('pointermove',move);addEventListener('pointerup',up);
+}
+renderCurve();
+
+// ---------- colour-through-ramp: start/end colour pickers ----------
+const cctStart=$('#cctStart'),cctEnd=$('#cctEnd');
+function lum(hex){const c=hex.replace('#','');const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);
+  return (.299*r+.587*g+.114*b)/255;}
+function warmth(hex){const c=hex.replace('#','');const r=parseInt(c.slice(0,2),16),b=parseInt(c.slice(4,6),16);
+  return r-b;} // +ve warm, -ve cool
+function describe(hex){const w=warmth(hex);return w>90?'warm ember':w>30?'warm white':w>-20?'neutral white':'cool daylight';}
+function updCct(){
+  cctStart.parentElement.style.background=cctStart.value;
+  cctEnd.parentElement.style.background=cctEnd.value;
+  $('#cctbar').style.background=`linear-gradient(90deg,${cctStart.value},${cctEnd.value})`;
+  $('#cctStartV').textContent='Start · '+describe(cctStart.value);
+  $('#cctEndV').textContent=describe(cctEnd.value)+' · End';
+}
+cctStart.addEventListener('input',updCct);cctEnd.addEventListener('input',updCct);updCct();
+
+// ---------- manual tab ----------
+function hsl(h,s,l){return `hsl(${h} ${s}% ${l}%)`;}
+function kToRgb(k){ // crude warm->cool swatch
+  const t=Math.max(0,Math.min(1,(k-2500)/7500));
+  const r=255, g=Math.round(180+60*t), b=Math.round(120+135*t);return `rgb(${r},${g},${b})`;}
+const mb=$('#mb'),mcct=$('#mcct'),mgm=$('#mgm'),mhue=$('#mhue'),msat=$('#msat'),hsiSw=$('#hsiSw');
+function updManual(){
+  $('#mbv').textContent=mb.value+'%';$('#mcctv').textContent=mcct.value+'K';
+  $('#mgmv').textContent=(mgm.value>0?'+':'')+mgm.value;
+  $('#mhuev').textContent=mhue.value+'°';$('#msatv').textContent=msat.value+'%';
+  const lum=30+ (mb.value/100)*55;
+  $('#swatch').style.background=hsiSw.checked?hsl(mhue.value,msat.value,lum):kToRgb(+mcct.value);
+  $('#swatch').style.opacity=0.35+0.65*(mb.value/100);
+}
+[mb,mcct,mgm,mhue,msat].forEach(el=>el.addEventListener('input',updManual));
+hsiSw.addEventListener('change',()=>{
+  $('#cctMode').style.display=hsiSw.checked?'none':'block';
+  $('#hsiModeBox').style.display=hsiSw.checked?'block':'none';
+  $('#hsiWord').textContent=hsiSw.checked?'Colour (HSI)':'White (CCT)';
+  $('#hsiWord').classList.toggle('off',!hsiSw.checked);updManual();});
+updManual();
+</script>
+</body>
+</html>
