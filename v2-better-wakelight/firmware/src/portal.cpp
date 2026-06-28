@@ -57,13 +57,11 @@ static void handleStatus() {
 
 static void alarmToJson(JsonObject o, const Alarm& a) {
   o["on"]   = a.enabled;
-  o["days"] = a.days;
   o["wake"] = a.wakeMin;
 }
 static void alarmFromJson(JsonVariantConst o, Alarm& a) {
   if (o.isNull()) return;
   a.enabled = o["on"] | a.enabled;
-  if (o["days"].is<int>()) a.days = (uint8_t)((int)o["days"] & 0x7F);
   if (o["wake"].is<int>()) a.wakeMin = constrain((int)o["wake"], 0, 1439);
 }
 

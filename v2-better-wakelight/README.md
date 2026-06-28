@@ -152,7 +152,7 @@ shape the sunrise, choose its colours, and control the light by hand.
 - **Sunrise:** brightness follows a chosen maths curve over the sunrise window,
   reaching your final level at the wake time while the colour sweeps from a warm
   start to a cool finish; it then holds for a configurable time and switches off.
-  Up to two alarms (each with its own days), plus a manual override and effects.
+  Up to two daily alarms, plus a manual override and effects.
 - **Many lamps:** each board publishes a unique `name.local` over mDNS (the first
   one also answers `wakelight.local`), so the app can discover and list every
   WakeLight on the network and jump between them.

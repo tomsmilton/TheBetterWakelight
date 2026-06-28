@@ -95,10 +95,6 @@ static const char PORTAL_HTML[] PROGMEM = R"HTML(<!doctype html>
     color:var(--text);font:inherit;font-weight:600;font-size:14px;border-radius:12px;padding:13px;cursor:pointer}
   .endbtn.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 10px rgba(204,85,0,.22)}
   .endbtn:disabled{opacity:.5}
-  .days{display:flex;gap:6px;margin-top:12px}
-  .d{font-size:12px;font-weight:700;flex:1;height:36px;border-radius:9px;display:grid;place-items:center;
-    background:var(--panel2);color:var(--muted);cursor:pointer;border:1px solid var(--line2)}
-  .d.on{background:var(--accent);color:#fff;border-color:var(--accent)}
   .curvewrap{margin-top:6px}
   .curve{display:block;width:100%;height:170px;background:var(--panel2);border:1px solid var(--line);
     border-radius:12px;touch-action:none}
@@ -224,8 +220,6 @@ static const char PORTAL_HTML[] PROGMEM = R"HTML(<!doctype html>
       </div>
     </div>
 
-    <div class="card"><p class="h2">Repeat</p><div class="days" id="days1"></div></div>
-
     <div class="card">
       <div class="lr" style="margin-top:0"><span>Sunrise length</span><b id="sunlenV">30 min</b></div>
       <input type="range" class="full" id="sunlen" min="5" max="90" value="30">
@@ -242,8 +236,6 @@ static const char PORTAL_HTML[] PROGMEM = R"HTML(<!doctype html>
       <div class="body-dim" id="a2body" style="margin-top:10px">
         <div class="lr" style="margin-top:0"><span>Wake time</span></div>
         <input type="time" id="a2time" value="08:30">
-        <p class="h2" style="margin-top:14px">Repeat</p>
-        <div class="days" id="days2"></div>
       </div>
     </div>
   </section>
@@ -440,18 +432,6 @@ $('#sunlen').addEventListener('input',()=>{$('#sunlenV').textContent=$('#sunlen'
 $('#finlevel').addEventListener('input',()=>{$('#finV').textContent=$('#finlevel').value+'%';sched.finalLevel=+$('#finlevel').value;saveSched();});
 $('#hold').addEventListener('input',()=>{$('#holdV').textContent=$('#hold').value+' min';sched.hold=+$('#hold').value;saveSched();});
 
-// ---------- repeat day pills (Mon-first display -> tm_wday bits) ----------
-const DAYBITS=[1,2,3,4,5,6,0], DAYLBL=['M','T','W','T','F','S','S'];
-function buildDays(el,ai){
-  el.innerHTML=DAYBITS.map((b,i)=>`<div class="d" data-bit="${b}">${DAYLBL[i]}</div>`).join('');
-  el.querySelectorAll('.d').forEach(d=>d.onclick=()=>{
-    const bit=+d.dataset.bit; sched.alarms[ai].days^=(1<<bit);
-    d.classList.toggle('on'); saveSched();
-  });
-}
-function paintDays(el,mask){el.querySelectorAll('.d').forEach(d=>d.classList.toggle('on',!!(mask&(1<<+d.dataset.bit))));}
-buildDays($('#days1'),0); buildDays($('#days2'),1);
-
 // ---------- second alarm ----------
 $('#a2sw').addEventListener('change',e=>{
   sched.alarms[1].on=e.target.checked;
@@ -602,12 +582,10 @@ function applySched(j){
   $('#wakeSw').checked=j.scheduleOn;$('#wakeWord').textContent=j.scheduleOn?'On':'Off';$('#wakeWord').classList.toggle('off',!j.scheduleOn);
   // scroller
   requestAnimationFrame(()=>{hCol.scrollTop=Math.floor(j.alarms[0].wake/60)*50;mCol.scrollTop=Math.round((j.alarms[0].wake%60)/5)*50;markSel(hCol);markSel(mCol);});
-  paintDays($('#days1'),j.alarms[0].days);
   // second alarm
   $('#a2sw').checked=j.alarms[1].on;$('#a2word').textContent=j.alarms[1].on?'On':'Off';$('#a2word').classList.toggle('off',!j.alarms[1].on);
   $('#a2sw').closest('.card').classList.toggle('disabled',!j.alarms[1].on);
   $('#a2time').value=String(Math.floor(j.alarms[1].wake/60)).padStart(2,'0')+':'+String(j.alarms[1].wake%60).padStart(2,'0');
-  paintDays($('#days2'),j.alarms[1].days);
   // detail sliders
   $('#sunlen').value=j.sunriseMin;$('#sunlenV').textContent=j.sunriseMin+' min';
   $('#finlevel').value=j.finalLevel;$('#finV').textContent=j.finalLevel+'%';

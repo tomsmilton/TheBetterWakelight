@@ -74,9 +74,9 @@ float Scheduler::curveAt(float t) {
 
 struct Target { bool active; bool hold; float bright; float cct; };
 
+// The alarm fires every day; this is its wake epoch on the day of `dayRef`.
 static time_t alarmWakeEpoch(const Alarm& a, time_t dayRef) {
   struct tm lt; localtime_r(&dayRef, &lt);
-  if (!(a.days & (1 << lt.tm_wday))) return 0;
   lt.tm_hour = a.wakeMin / 60; lt.tm_min = a.wakeMin % 60; lt.tm_sec = 0; lt.tm_isdst = -1;
   return mktime(&lt);
 }

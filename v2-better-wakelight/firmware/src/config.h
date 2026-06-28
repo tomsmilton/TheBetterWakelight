@@ -5,7 +5,7 @@
 // Persistent configuration (NVS-backed) for the WakeLight controller.
 //
 // Model mirrors the web UI 1:1:
-//   - up to two alarms, each a single wake time + a day-of-week mask
+//   - up to two alarms, each just a single wake time (fires every day)
 //   - one shared "sunrise shape": a maths curve (function + rise window + skew)
 //     that ramps brightness 0 -> finalLevel and sweeps colour startCct -> endCct
 //   - hold time after wake, then off
@@ -29,8 +29,7 @@ enum CurveFn : uint8_t {
 
 struct Alarm {
   bool     enabled = false;
-  uint8_t  days    = 0;       // bitmask, bit0=Sun .. bit6=Sat (tm_wday)
-  uint16_t wakeMin = 7 * 60;  // minute-of-day the lamp reaches full brightness
+  uint16_t wakeMin = 7 * 60;  // minute-of-day the lamp reaches full brightness (fires daily)
 };
 
 struct Config {
@@ -66,9 +65,8 @@ struct Config {
   char     name[32]      = "WakeLight";   // friendly name shown in the UI
 
   Config() {
-    // Primary alarm on by default: 07:00, Monday–Friday (tm_wday bits 1..5).
+    // Primary alarm on by default: 07:00, every day.
     alarms[0].enabled = true;
-    alarms[0].days    = 0b0111110;
     alarms[0].wakeMin = 7 * 60;
   }
 

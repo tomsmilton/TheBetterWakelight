@@ -6,7 +6,7 @@ Config cfg;
 
 static Preferences prefs;
 static const char* NVS_NS  = "wakelight";
-static const char* NVS_KEY = "cfg4";        // bump suffix if struct layout changes
+static const char* NVS_KEY = "cfg5";        // bump suffix if struct layout changes
 
 void Config::load() {
   prefs.begin(NVS_NS, true);
