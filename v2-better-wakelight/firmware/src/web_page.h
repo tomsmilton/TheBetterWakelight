@@ -271,7 +271,7 @@ static const char PORTAL_HTML[] PROGMEM = R"HTML(<!doctype html>
       <div class="fx" id="fxPopular" style="margin-top:12px"></div>
       <button class="endbtn" id="fxToggle" style="margin-top:12px">Show all effects (17)</button>
       <div id="fxAll" style="display:none;margin-top:12px"></div>
-      <p class="hintnote">Tap an effect to run it on the lamp.</p>
+      <p class="hintnote">Tap an effect to run it; tap the same one again to stop and go back.</p>
     </div>
   </section>
 
@@ -354,9 +354,17 @@ const EFFECTS=[
 ];
 function selectFx(id){
   const f=EFFECTS.find(x=>x.id===id); if(!f)return;
+  if(activeFx===id){ stopFx(); return; }                       // tap the running one again -> stop
+  if(!activeFx) fxReturnsTo = overrideOn ? 'manual' : 'off';   // remember what to return to
+  activeFx=id;
   $$('[data-fx]').forEach(x=>x.classList.toggle('on',x.dataset.fx===id));
   api('/api/effect',{method:'POST',headers:J,body:JSON.stringify({fx:f.b,level:80,p:f.p})});
   setOverrideUI(true);
+}
+function stopFx(){
+  const back=fxReturnsTo; fxReturnsTo=null; clearFxSel();
+  if(back==='manual') sendManual();   // back to the plain light it was before the effect
+  else sendOverride(false);           // it was off / scheduled -> turn the light off
 }
 $('#fxPopular').innerHTML=EFFECTS.filter(f=>f.pop).map(f=>`<div class="fxc" data-fx="${f.id}"><div class="ic">${f.e}</div><div class="nm">${f.n}</div></div>`).join('');
 $('#fxAll').innerHTML=EFFECTS.map(f=>`<button class="fxchip" data-fx="${f.id}"><span class="ic">${f.e}</span>${f.n}</button>`).join('');
@@ -365,7 +373,8 @@ $('#fxToggle').addEventListener('click',()=>{const open=$('#fxAll').style.displa
   $('#fxAll').style.display=open?'none':'block';$('#fxToggle').textContent=open?'Show all effects (17)':'Hide full list';});
 
 // ---------- override (linked Home + Manual toggles) ----------
-let overrideOn=false;
+let overrideOn=false, activeFx=null, fxReturnsTo=null;
+function clearFxSel(){ activeFx=null; $$('[data-fx]').forEach(x=>x.classList.remove('on')); }
 function setOverrideUI(v){
   overrideOn=v;
   $('#onSw').checked=v; $('#onSw2').checked=v;
@@ -373,6 +382,7 @@ function setOverrideUI(v){
   $('#manualLightCard').classList.toggle('disabled',!v);
   $('#onWord').textContent=v?'On':'Off'; $('#onWord').classList.toggle('off',!v);
   $('#onWord2').textContent=v?'On':'Off'; $('#onWord2').classList.toggle('off',!v);
+  if(!v) clearFxSel();              // light off -> nothing is running
 }
 function sendOverride(on){ api('/api/override',{method:'POST',headers:J,body:JSON.stringify({on})}); setOverrideUI(on); }
 $('#onSw').addEventListener('change',e=>sendOverride(e.target.checked));
@@ -385,7 +395,7 @@ function sendManual(){clearTimeout(mT);mT=setTimeout(()=>{
   api('/api/manual',{method:'POST',headers:J,body:JSON.stringify({
     level:+$('#mb').value, hsi, cct:+$('#mcct').value, gm:+$('#mgm').value,
     hue:+$('#mhue').value, sat:+$('#msat').value })});
-  setOverrideUI(true);
+  setOverrideUI(true); clearFxSel();   // a manual tweak replaces any running effect
 },120);}
 function kToRgb(k){const t=Math.max(0,Math.min(1,(k-2500)/7500));return `rgb(255,${Math.round(180+60*t)},${Math.round(120+135*t)})`;}
 function updManual(){
@@ -406,7 +416,7 @@ $('#hsiSw').addEventListener('change',()=>{
 let hmT=null;
 function sendHome(){clearTimeout(hmT);hmT=setTimeout(()=>{
   api('/api/manual',{method:'POST',headers:J,body:JSON.stringify({level:+$('#homeB').value,cct:+$('#homeC').value})});
-  setOverrideUI(true);
+  setOverrideUI(true); clearFxSel();
 },120);}
 $('#homeB').addEventListener('input',()=>{$('#homeBv').textContent=$('#homeB').value+'%';sendHome();});
 $('#homeC').addEventListener('input',()=>{$('#homeCv').textContent=$('#homeC').value+'K';sendHome();});
